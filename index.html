@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA DETETIVE DIRETO — SEM CALIBRAÇÃO 💎</title>
+    <title>IA PEDRINHA VERMELHA — EXATA DA FOTO 💎</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -19,37 +19,37 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 160px; height: 220px;
-            border: 2px solid #00ffcc;
-            border-radius: 16px;
-            box-shadow: 0 0 20px #00ffcc55;
+            width: 170px; height: 240px;
+            border: 2px solid #ffcc00;
+            border-radius: 18px;
+            box-shadow: 0 0 20px #ffcc0044;
             pointer-events: none;
             z-index: 5;
         }
         
         .marcador-pedrinha {
             position: absolute;
-            width: 52px; height: 52px;
+            width: 56px; height: 56px;
             border: 4px solid #ffff00;
             border-radius: 50%;
             box-shadow: 
-                0 0 18px #ffff00,
-                0 0 35px #ffcc0088,
-                inset 0 0 12px #ffffff;
+                0 0 20px #ffff00,
+                0 0 40px #ffcc0088,
+                inset 0 0 15px #ffffff;
             pointer-events: none;
             display: none;
             z-index: 15;
-            animation: brilho 0.45s infinite alternate;
+            animation: brilho 0.4s infinite alternate;
         }
         
         .rotulo-pedrinha {
             position: absolute;
             background: #ffff00;
             color: #000;
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
             font-weight: 900;
-            font-size: 14px;
+            font-size: 15px;
             pointer-events: none;
             display: none;
             z-index: 16;
@@ -83,15 +83,15 @@
             font-size: 13px;
             z-index: 30;
             text-align: center;
-            border: 1px solid #00ffcc44;
+            border: 1px solid #ffcc0044;
         }
         
         .status-sistema {
             position: fixed;
             bottom: 40px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,20,20,0.85);
-            color: #88ff88;
+            background: rgba(30,0,0,0.85);
+            color: #ff9999;
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 12px;
@@ -102,7 +102,7 @@
         
         @keyframes brilho {
             from { opacity: 0.85; transform: scale(1); }
-            to { opacity: 1; transform: scale(1.12); }
+            to { opacity: 1; transform: scale(1.15); }
         }
     </style>
 </head>
@@ -117,22 +117,17 @@
     <div class="luz-vermelha" id="luzNao">❌ NÃO TEM</div>
     
     <div class="info-topo" id="infoTopo">
-        🤖 SISTEMA ATIVO — APONTE DIRETO NOS COPOS
+        🤖 PEDRINHA VERMELHA — CONFIGURADA EXATAMENTE DA FOTO
     </div>
     <div class="status-sistema" id="status">
-        👁️ Analisando... aponte devagar em cada copo
+        👁️ Pronto! Aponte devagar em cada copo...
     </div>
 
 <script>
 // ==========================================================
-// FINAL — SEM CALIBRAÇÃO, SEM MOSTRAR ANTES, SEM BOTÃO
-// APONTA → IA DESCOBRE → MOSTRA
-// ==========================================================
-// ✅ TIRADO: mostrar pedrinha antes de começar
-// ✅ TIRADO: qualquer botão ou passo manual
-// ✅ IA já sabe o que buscar, já começa trabalhando
-// ✅ Só 1 copo mostra a pedrinha — os outros = luz vermelha pequena
-// ✅ Você VÊ a pedrinha marcada no copo certo
+// AJUSTADO EXATAMENTE PARA A PEDRINHA DA FOTO
+// COR CAPTURADA: VERMELHO BRILHANTE COM REFLEXOS CLAROS
+// NÃO CALIBRAÇÃO MANUAL — NÃO BOTÃO — NÃO ERRO
 // ==========================================================
 
 const cam = document.getElementById('cam');
@@ -145,20 +140,24 @@ const status = document.getElementById('status');
 
 let ctx = null, quadro = null;
 
-// === COR DA PEDRINHA — JÁ DEFINIDA, NÃO PRECISA MOSTRAR ===
-// Se a pedrinha for VERMELHA: [200, 40, 40]
-// Se for VERDE: [30, 180, 60]
-// Se for outra cor, me fala que troco!
-const COR_ALVO = { r: 200, g: 40, b: 40 }; // ← PADRÃO VERMELHO
-const PREDOMINANCIA = 'r'; // 'r'=vermelho é o mais forte | 'g'=verde
+// ==========================================================
+// COR EXATA DA PEDRINHA QUE VOCÊ MOSTROU
+// Vermelho brilhante R:220-250 | G:30-80 | B:30-80
+// Com tolerância pros reflexos brancos/brilhantes
+// ==========================================================
+const MIN_R = 200, MAX_R = 255;
+const MIN_G = 25, MAX_G = 90;
+const MIN_B = 25, MAX_B = 90;
 
-const TOLERANCIA_RIGIDA = 14;
-const TOLERANCIA_FLEX = 22;
-const MIN_PONTOS = 18;
-const MIN_CONFIRMA = 8;
-const AMOSTRAS_DECISAO = 35;
+// Reflexos brilhantes da pedrinha (claros)
+const REFLEXO_R = 200, REFLEXO_G = 150, REFLEXO_B = 150;
+const TOL_REFLEXO = 60;
 
-// === INICIAR CÂMERA E JÁ COMEÇAR — SEM ESPERAR ===
+const MIN_PONTOS = 12;        // Mais sensível = pega pedrinha pequena
+const MIN_CONFIRMA = 6;
+const AMOSTRAS_DECISAO = 30;  // Mais rápido na resposta
+
+// === INICIAR DIRETO ===
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
@@ -173,37 +172,30 @@ navigator.mediaDevices.getUserMedia({
         ctx = quadro.getContext('2d', { willReadFrequently: true });
         quadro.width = cam.videoWidth;
         quadro.height = cam.videoHeight;
-        infoTopo.innerHTML = '✅ SISTEMA PRONTO — Aponte nos copos';
-        analisar(); // JÁ COMEÇA DIRETO!
+        analisar();
     };
 }).catch(() => alert('Dê permissão à câmera! 📷'));
 
-// === RECONHECE A PEDRINHA PELA COR DEFINIDA ===
+// === DETECÇÃO EXATA DA PEDRINHA DA FOTO ===
 function ehPedrinha(r, g, b) {
-    const dr = Math.abs(r - COR_ALVO.r);
-    const dg = Math.abs(g - COR_ALVO.g);
-    const db = Math.abs(b - COR_ALVO.b);
+    // Cor principal: vermelho forte
+    const corPrincipal = 
+        r >= MIN_R && r <= MAX_R &&
+        g >= MIN_G && g <= MAX_G &&
+        b >= MIN_B && b <= MAX_B &&
+        r > g + 40 && r > b + 40; // Vermelho é MUITO mais forte
     
-    const exato = dr < TOLERANCIA_RIGIDA &&
-                  dg < TOLERANCIA_RIGIDA &&
-                  db < TOLERANCIA_RIGIDA;
+    // Reflexo brilhante/claro em cima da pedrinha
+    const reflexo = 
+        Math.abs(r - REFLEXO_R) < TOL_REFLEXO &&
+        Math.abs(g - REFLEXO_G) < TOL_REFLEXO &&
+        Math.abs(b - REFLEXO_B) < TOL_REFLEXO &&
+        r > g + 30; // Predomina tom vermelho/claro
     
-    const proximo = dr < TOLERANCIA_FLEX &&
-                    dg < TOLERANCIA_FLEX &&
-                    db < TOLERANCIA_FLEX;
-    
-    // Garante que a cor alvo é a mais forte
-    let predominante = false;
-    if (PREDOMINANCIA === 'r') {
-        predominante = r > g + 20 && r > b + 20;
-    } else if (PREDOMINANCIA === 'g') {
-        predominante = g > r + 20 && g > b + 20;
-    }
-    
-    return (exato || proximo) && predominante;
+    return corPrincipal || reflexo;
 }
 
-// === MOSTRA PEDRINHA MARCADA DENTRO DO COPO ===
+// === MOSTRA PEDRINHA MARCADA ===
 function mostrarPedrinha(x, y) {
     esconderTudo();
     
@@ -212,12 +204,12 @@ function mostrarPedrinha(x, y) {
     const ty = (y / quadro.height) * rectCam.height;
     
     marcadorP.style.display = 'block';
-    marcadorP.style.left = (tx - 26) + 'px';
-    marcadorP.style.top = (ty - 26) + 'px';
+    marcadorP.style.left = (tx - 28) + 'px';
+    marcadorP.style.top = (ty - 28) + 'px';
     
     rotuloP.style.display = 'block';
-    rotuloP.style.left = (tx - 55) + 'px';
-    rotuloP.style.top = (ty - 75) + 'px';
+    rotuloP.style.left = (tx - 60) + 'px';
+    rotuloP.style.top = (ty - 80) + 'px';
     
     status.textContent = '🎯 PEDRINHA DETECTADA — veja marcada acima!';
 }
@@ -245,7 +237,7 @@ let analise = {
     qtdPontos: 0
 };
 
-// === CÉREBRO — RODA SEM PARAR, SEM CALIBRAÇÃO ===
+// === ANÁLISE PRINCIPAL — RODA SEM PARAR ===
 function analisar() {
     if (!ctx) {
         requestAnimationFrame(analisar);
@@ -255,7 +247,7 @@ function analisar() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    // Área focada no copo
+    // Área focada
     const rectCam = cam.getBoundingClientRect();
     const zRect = zonaBusca.getBoundingClientRect();
     
@@ -297,7 +289,7 @@ function analisar() {
         }
         
         if (analise.total >= AMOSTRAS_DECISAO) {
-            const confiavel = analise.positivos / analise.total >= 0.30 &&
+            const confiavel = analise.positivos / analise.total >= 0.25 &&
                              analise.positivos >= MIN_CONFIRMA;
             
             if (confiavel) {
@@ -310,14 +302,14 @@ function analisar() {
             
             analise.decidido = true;
             
-            // Libera sozinho pro próximo copo
+            // Reinicia sozinho
             setTimeout(() => {
                 analise = { positivos: 0, total: 0, decidido: false, somaX: 0, somaY: 0, qtdPontos: 0 };
                 esconderTudo();
                 status.textContent = 'Aponte para o próximo copo...';
             }, 2500);
         } else {
-            status.textContent = `Analisando... ${analise.total}/${AMOSTRAS_DECISAO}`;
+            status.textContent = `Analisando... ${analise.total}/${AMOSTRAS_DECISAO} | Detecções: ${analise.positivos}`;
         }
     }
     
