@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>TRACKER PEDRINHA — 3 COBERTURAS NO MESMO COPO</title>
+<title>TRACKER PEDRINHA — SUPER PREGADO</title>
 <style>
     * {
         margin: 0;
@@ -34,9 +34,9 @@
         z-index: 50;
         display: none;
         border-radius: 8px;
-        opacity: 0.92;
-        box-shadow: 0 0 25px currentColor;
-        transition: left 0.025s linear, top 0.025s linear, width 0.025s linear, height 0.025s linear;
+        opacity: 0.95;
+        box-shadow: 0 0 35px currentColor;
+        transition: left 0.012s linear, top 0.012s linear, width 0.012s linear, height 0.012s linear;
     }
 
     .roxo {
@@ -163,7 +163,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NO COPO QUE ESTÁ COM A PEDRINHA
+        👆 TOQUE NO COPO COM A PEDRINHA
     </div>
 
     <div class="instrucao" id="instrucao">
@@ -188,7 +188,7 @@ let canvas, ctx;
 
 const alvo = {
     marcado: false,
-    corRef: { r: 0, g: 0, b: 0, tol: 35 },
+    corRef: { r: 0, g: 0, b: 0, tol: 45 },
     x: 0,
     y: 0,
     imgX: 0,
@@ -197,10 +197,10 @@ const alvo = {
     ultY: 0,
     velocX: 0,
     velocY: 0,
-    raioBusca: 100,
-    resp: 0.55,
+    raioBusca: 130,
+    resp: 0.88,
     perdidos: 0,
-    maxPerdidos: 320
+    maxPerdidos: 600
 };
 
 const coberturas = [
@@ -260,20 +260,20 @@ function marcarPedrinha(e) {
 
     let r = 0, g = 0, b = 0, q = 0;
 
-    for (let dy = -40; dy <= 40; dy += 2) {
-        for (let dx = -40; dx <= 40; dx += 2) {
+    for (let dy = -50; dy <= 50; dy += 1) {
+        for (let dx = -50; dx <= 50; dx += 1) {
             const px = Math.round(alvo.imgX + dx);
             const py = Math.round(alvo.imgY + dy);
 
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > 40) continue;
+            if (Math.hypot(dx, dy) > 50) continue;
 
             const i = (py * canvas.width + px) * 4;
             r += dados[i];
             g += dados[i + 1];
             b += dados[i + 2];
             q++;
-        }
+        })
     }
 
     alvo.corRef.r = Math.round(r / q);
@@ -281,7 +281,7 @@ function marcarPedrinha(e) {
     alvo.corRef.b = Math.round(b / q);
 
     coberturas.forEach(c => {
-        c.el.style.display = 'block';
+        c.el.display = 'block';
     });
 
     aviso.innerHTML = '✅ PEDRINHA MARCADA! EMBARALHE OS COPOS';
@@ -301,19 +301,18 @@ function rastrearAlvo() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    const centroX = alvo.imgX + alvo.velocX * 0.5;
-    const centroY = alvo.imgY + alvo.velocY * 0.5;
-    const raio = alvo.raioBusca;
+    const centroX = alvo.imgX + alvo.velocX * 0.6;
+    const centroY = alvo.velocY * 0.6;
 
     let somaX = 0, somaY = 0, q = 0;
 
-    for (let dy = -raio; dy <= raio; dy += 2) {
-        for (let dx = -raio; dx <= raio; dx += 2) {
+    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 1) {
+        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 1) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
 
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > raio) continue;
+            if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
 
             const i = (py * canvas.width + px) * 4;
             const r = dados[i], g = dados[i + 1], b = dados[i + 2];
@@ -330,15 +329,15 @@ function rastrearAlvo() {
         }
     }
 
-    if (q >= 12) {
+    if (q >= 8) {
         const novoImgX = somaX / q;
         const novoImgY = somaY / q;
 
         const deslX = novoImgX - alvo.imgX;
-        const deslY = novoImgY - alvo.imgY;
+        const deslY = novoImgY - alvo.y;
 
-        alvo.velocX = deslX * 0.65 + alvo.velocX * 0.35;
-        alvo.velocY = deslY * 0.65 + alvo.velocY * 0.35;
+        alvo.velocX = deslX * 0.8 + alvo.velocX * 0.2;
+        alvo.velocY = deslY * 0.8 + alvo.velocY * 0.2;
 
         const novoX = (novoImgX / canvas.width) * rect.width;
         const novoY = (novoImgY / canvas.height) * rect.height;
@@ -351,12 +350,14 @@ function rastrearAlvo() {
         alvo.ultX = novoX;
         alvo.ultY = novoY;
         alvo.perdidos = 0;
-    } else {
+    }
+
+    else {
         alvo.perdidos++;
 
         if (alvo.perdidos < alvo.maxPerdidos) {
-            alvo.velocX *= 0.98;
-            alvo.velocY *= 0.98;
+            alvo.velocX *= 0.99;
+            alvo.velocY *= 0.99;
 
             alvo.imgX += alvo.velocX;
             alvo.imgY += alvo.velocY;
@@ -376,7 +377,7 @@ function posicionarCoberturas() {
         c.el.style.height = c.h + 'px';
         c.el.style.left = (alvo.x - c.w / 2 + c.deslocX) + 'px';
         c.el.style.top = (alvo.y - c.h / 2 + c.deslocY) + 'px';
-    });
+    })
 }
 
 btnMarcar.addEventListener('click', marcarPedrinha);
@@ -396,7 +397,7 @@ btnReiniciar.addEventListener('click', () => {
 
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
-    aviso.innerHTML = '👆 TOQUE NO COPO QUE ESTÁ COM A PEDRINHA';
+    aviso.innerHTML = '👆 TOQUE NO COPO COM A PEDRINHA';
 });
 </script>
 </body>
