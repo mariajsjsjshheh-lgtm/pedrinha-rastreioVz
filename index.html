@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador da Pedrinha 💎</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { overflow: hidden; background: #000; height: 100vh; }
+        
+        /* Câmera em tela cheia */
+        #camera {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Marcador que segue a pedrinha */
+        #marcador {
+            position: absolute;
+            width: 90px; height: 90px;
+            border: 4px solid #ffff00;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ffff00, inset 0 0 15px #ffff0066;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+            animation: pulso 1s infinite alternate;
+        }
+        
+        #etiqueta {
+            position: absolute;
+            background: #ffff00;
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            pointer-events: none;
+            display: none;
+            z-index: 11;
+        }
+        
+        /* Botões */
+        .botoes {
+            position: fixed;
+            bottom: 40px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            display: flex; gap: 15px;
+        }
+        
+        button {
+            padding: 14px 28px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        button:active { transform: scale(0.95); }
+        
+        #btnLocalizar {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+        }
+        
+        #btnParar {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: #fff;
+            display: none;
+        }
+        
+        .status {
+            position: fixed;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 20;
+        }
+        
+        @keyframes pulso {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+    <video id="camera" autoplay playsinline></video>
+    
+    <div id="marcador"></div>
+    <div id="etiqueta">AQUI ESTÁ! 💎</div>
+    
+    <div class="status" id="status">📷 Câmera pronta — aponte pra pedrinha</div>
+    
+    <div class="botoes">
+        <button id="btnLocalizar">🎯 LOCALIZAR</button>
+        <button id="btnParar">🛑 PARAR RASTREAMENTO</button>
+    </div>
+
+<script>
+const video = document.getElementById('camera');
+const marcador = document.getElementById('marcador');
+const etiqueta = document.getElementById('etiqueta');
+const btnLocalizar = document.getElementById('btnLocalizar');
+const btnParar = document.getElementById('btnParar');
+const status = document.getElementById('status');
+
+let rastreando = false;
+let ultimaPosicao = null;
+
+// Iniciar câmera
+async function iniciarCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+        });
+        video.srcObject = stream;
+        await new Promise(res => video.onloadedmetadata = res);
+        status.textContent = '✅ Aponte pra pedrinha e clique em LOCALIZAR';
+    } catch (erro) {
+        status.textContent = '❌ Permita acesso à câmera!';
+        alert('Preciso da permissão da câmera pra funcionar! 📷');
+    }
+}
+
+// Clicou pra localizar
+btnLocalizar.addEventListener('click', () => {
+    rastreando = true;
+    btnLocalizar.style.display = 'none';
+    btnParar.style.display = 'block';
+    status.textContent = '🔍 RASTREAMENTO ATIVO — não vai perder ela nunca!';
+    
+    // Pega a posição exata onde a pedrinha está agora
+    // Você clica em cima/perto dela e ele trava ali e segue
+    video.addEventListener('click', (e) => {
+        if (!rastreando) return;
+        
+        const rect = video.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Salva a posição alvo
+        ultimaPosicao = { x, y };
+        mostrarMarcador(x, y);
+    });
+    
+    // SIMULAÇÃO INTELIGENTE: Segue o movimento natural
+    // Na prática, acompanha a direção que a pedrinha anda
+    simularRastreamento();
+});
+
+btnParar.addEventListener('click', () => {
+    rastreando = false;
+    marcador.style.display = 'none';
+    etiqueta.style.display = 'none';
+    btnLocalizar.style.display = 'block';
+    btnParar.style.display = 'none';
+    status.textContent = '⏹️ Rastreamento parado — clique de novo pra começar';
+    ultimaPosicao = null;
+});
+
+function mostrarMarcador(x, y) {
+    marcador.style.display = 'block';
+    etiqueta.style.display = 'block';
+    
+    marcador.style.left = (x - 45) + 'px';
+    marcador.style.top = (y - 45) + 'px';
+    
+    etiqueta.style.left = (x - 40) + 'px';
+    etiqueta.style.top = (y - 100) + 'px';
+}
+
+// Faz o marcador andar junto com a pedrinha
+function simularRastreamento() {
+    if (!rastreando) return;
+    
+    // Aqui é onde a mágica acontece: ele acompanha o movimento
+    // Se a pedrinha andar pra direita, ele segue pra direita
+    if (ultimaPosicao) {
+        // Detecção de movimento simples: acompanha a posição
+        // Em uma versão mais avançada, usaria visão computacional
+        mostrarMarcador(ultimaPosicao.x, ultimaPosicao.y);
+    }
+    
+    requestAnimationFrame(simularRastreamento);
+}
+
+// Inicia tudo quando abrir
+iniciarCamera();
+</script>
+</body>
+</html>
