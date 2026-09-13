@@ -2,498 +2,243 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASTREIO PROFISSIONAL — SEGUE ONDE FOR 💎🎯</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>SEGUE O COPO — CLICA E ACOMPANHA 💎</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { 
-            overflow: hidden; 
-            background: linear-gradient(135deg, #0a0a0f, #101418); 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #000;
             height: 100vh;
+            touch-action: none;
         }
-        
+
         video {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
         }
-        
-        /* BOLINHA PROFISSIONAL — NÃO SOMTE, BEM VISÍVEL */
-        .marcador-alvo {
+
+        /* ✅ O SÍMBOLO DA GOTINHA — IGUAL O DA FOTO */
+        .marcador-selecao {
             position: absolute;
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #fff9c4, #ffd700, #e6a800);
-            box-shadow: 
-                0 0 0 2px rgba(255, 215, 0, 0.9),
-                0 0 15px 5px rgba(255, 215, 0, 0.6),
-                0 0 30px 10px rgba(255, 215, 0, 0.35),
-                inset 0 0 12px rgba(255, 255, 255, 0.8);
+            width: 52px; height: 64px;
             pointer-events: none;
-            display: none;
             z-index: 100;
-            transition: left 0.06s cubic-bezier(0.2, 0.8, 0.2, 1), 
-                        top 0.06s cubic-bezier(0.2, 0.8, 0.2, 1);
-            will-change: left, top;
-        }
-        
-        .anel-externo {
-            position: absolute;
-            width: 60px; height: 60px;
-            border: 2px solid rgba(255, 215, 0, 0.5);
-            border-radius: 50%;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation: expandir 1.5s ease-out infinite;
-        }
-        
-        .etiqueta {
-            position: absolute;
-            top: -32px;
-            left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, #ffd700, #ffb300);
-            color: #000;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-weight: 900;
-            font-size: 11px;
-            white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-        }
-        
-        .sem-alvo {
-            position: absolute;
-            top: 22%; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, #b71c1c, #d32f2f);
-            color: #fff;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 14px;
-            border: 2px solid #ff5252;
-            box-shadow: 0 0 20px rgba(255, 82, 82, 0.4);
             display: none;
-            z-index: 90;
+            transition: left 0.08s ease-out, top 0.08s ease-out;
+            filter: drop-shadow(0 0 8px rgba(0, 150, 136, 0.7));
         }
-        
-        .painel-superior {
+
+        .gotinha {
+            width: 100%;
+            height: 100%;
+        }
+
+        .rotulo {
+            position: absolute;
+            top: -28px; left: 50%;
+            transform: translateX(-50%);
+            background: #009688;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .instrucao {
             position: fixed;
-            top: 12px; left: 50%; transform: translateX(-50%);
+            top: 15px; left: 50%;
+            transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 12px 24px;
+            color: white;
+            padding: 12px 25px;
             border-radius: 30px;
-            font-size: 13px;
-            z-index: 110;
+            font-size: 14px;
+            z-index: 200;
             text-align: center;
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            max-width: 94%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            border: 2px solid #009688;
         }
-        
-        .dados-posicao {
+
+        .status {
             position: fixed;
-            top: 70px; left: 50%; transform: translateX(-50%);
-            background: rgba(20, 30, 20, 0.85);
-            color: #cfff8f;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 110;
-            border: 1px solid rgba(144, 255, 80, 0.3);
-        }
-        
-        .status-operacao {
-            position: fixed;
-            bottom: 95px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 25, 35, 0.85);
+            bottom: 30px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
             color: #80ffea;
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 12px;
-            z-index: 110;
-            border: 1px solid rgba(128, 255, 234, 0.3);
+            z-index: 200;
         }
-        
-        .area-botoes {
+
+        .btn-resetar {
             position: fixed;
-            bottom: 25px; left: 50%; transform: translateX(-50%);
-            z-index: 110;
-            display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
-        }
-        
-        button {
-            padding: 15px 32px;
-            font-size: 16px;
-            font-weight: 900;
+            bottom: 80px; left: 50%;
+            transform: translateX(-50%);
+            background: #009688;
+            color: white;
             border: none;
-            border-radius: 50px;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-            transition: all 0.15s ease;
+            z-index: 200;
+            box-shadow: 0 4px 15px rgba(0,150,136,0.4);
         }
-        button:active { transform: scale(0.96); }
-        
-        #btnCalibrar {
-            background: linear-gradient(135deg, #00c853, #00e676);
-            color: #000;
-            font-size: 17px;
-            padding: 16px 40px;
-        }
-        #btnParar {
-            background: linear-gradient(135deg, #c62828, #ef5350);
-            color: #fff;
-            display: none;
-        }
-        #btnReiniciar {
-            background: linear-gradient(135deg, #424242, #616161);
-            color: #fff;
-            display: none;
-        }
-        
-        @keyframes expandir {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; }
-        }
+        .btn-resetar:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
-    <video id="camera" autoplay playsinline muted></video>
-    
-    <div class="marcador-alvo" id="marcador">
-        <div class="anel-externo"></div>
-        <div class="etiqueta">💎 PEDRINHA</div>
+    <video id="cam" autoplay playsinline></video>
+
+    <!-- ✅ GOTINHA QUE SEGUE O COPO -->
+    <div class="marcador-selecao" id="marcador">
+        <svg class="gotinha" viewBox="0 0 52 64">
+            <!-- Forma exata da gotinha da foto -->
+            <path d="M26 0 C26 0 0 24 0 42 C0 54 11.7 64 26 64 C40.3 64 52 54 52 42 C52 24 26 0 26 0 Z" 
+                  fill="#009688" />
+        </svg>
+        <div class="rotulo" id="rotulo">COPO SELECIONADO ✅</div>
     </div>
-    
-    <div class="sem-alvo" id="avisoNao">❌ PEDRINHA FORA DE VISÃO</div>
-    
-    <div class="painel-superior" id="cabecalho">
-        🎯 RASTREIO PROFISSIONAL — SEGUE EM QUALQUER LUGAR
+
+    <div class="instrucao" id="instrucao">
+        👆 TOQUE NO COPO PARA MARCAR — ele vai seguir pra onde for!
     </div>
-    <div class="dados-posicao" id="dadosPosicao">
-        Sistema pronto — calibre com a pedrinha visível
-    </div>
-    <div class="status-operacao" id="statusSistema">
-        👁️ Passo 1: Mostre a pedrinha bem visível → Passo 2: CALIBRAR
-    </div>
-    
-    <div class="area-botoes">
-        <button id="btnCalibrar">🚀 CALIBRAR E INICIAR</button>
-        <button id="btnParar">⏹️ PARAR</button>
-        <button id="btnReiniciar">🔄 REINICIAR TUDO</button>
+
+    <button class="btn-resetar" id="btnReset">🔄 ESCOLHER OUTRO COPO</button>
+
+    <div class="status" id="status">
+        Aguardando você tocar no copo...
     </div>
 
 <script>
 // ==============================================================
-// RASTREIO PROFISSIONAL — VERSÃO REFEITA DO ZERO
+// SISTEMA DE SEGUIMENTO POR TOQUE — IGUAL SELEÇÃO DE TEXTO
 // ==============================================================
-// ✅ Bolinha redesenhada do zero — brilho profissional, sem sumir
-// ✅ Cálculo de posição PURA — sem travas, sem forçar centro
-// ✅ Segue pra esquerda, direita, cima, baixo — QUALQUER COORDENADA
-// ✅ Filtro de confiança — ignora reflexos e ruídos
-// ✅ Suavização inteligente — movimento natural, sem pular
-// ✅ Código organizado e comentado — fácil de entender
+// ✅ TOCA NO COPO → GOTINHA APARECE E GRUDA
+// ✅ MOVE O COPO → GOTINHA VAI JUNTO, SEM FICAR NO MEIO
+// ✅ CLICA DE NOVO → TIRA E ESCOLHE OUTRO
+// ✅ SIMPLES, SEM COMPLICAÇÃO DE COR
 // ==============================================================
 
-const camera = document.getElementById('camera');
+const cam = document.getElementById('cam');
 const marcador = document.getElementById('marcador');
-const avisoNao = document.getElementById('avisoNao');
-const cabecalho = document.getElementById('cabecalho');
-const dadosPosicao = document.getElementById('dadosPosicao');
-const statusSistema = document.getElementById('statusSistema');
-const btnCalibrar = document.getElementById('btnCalibrar');
-const btnParar = document.getElementById('btnParar');
-const btnReiniciar = document.getElementById('btnReiniciar');
+const rotulo = document.getElementById('rotulo');
+const instrucao = document.getElementById('instrucao');
+const btnReset = document.getElementById('btnReset');
+const status = document.getElementById('status');
 
-let corAlvo = null;
-let canvas = null, contexto = null;
-let rastreioAtivo = false;
+let seguindo = false;
+let alvoX = 0, alvoY = 0;
+let historico = [];
+const SUAVIZACAO = 5; // Menor = mais rápido
 
-// Parâmetros ajustados e testados
-const TOLERANCIA_COR = 22;        // Sensibilidade à cor
-const PONTOS_CONFIRMACAO = 25;     // Quantos pixels = tem a pedrinha
-const TAMANHO_MINIMO = 8;          // Ignora sujeirinha pequena
-const HISTORICO_TAMANHO = 6;       // Suavização do movimento
-
-// Histórico para suavização (evita tremores)
-let historicoPosicao = [];
-
-// ==============================================================
-// INICIALIZAÇÃO DA CÂMERA
-// ==============================================================
+// === LIGAR CÂMERA ===
 navigator.mediaDevices.getUserMedia({
-    video: {
-        facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        frameRate: { ideal: 30 }
-    }
-}).then(function (fluxo) {
-    camera.srcObject = fluxo;
-    camera.onloadedmetadata = function () {
-        canvas = document.createElement('canvas');
-        contexto = canvas.getContext('2d', { willReadFrequently: true });
-        canvas.width = camera.videoWidth;
-        canvas.height = camera.videoHeight;
-        cabecalho.innerHTML = '✅ Câmera pronta — Mostre a pedrinha e clique em CALIBRAR';
-    };
-}).catch(function () {
-    alert('⚠️ É PERMITIR o acesso à câmera para funcionar!');
-    cabecalho.innerHTML = '❌ Permita a câmera nas configurações do navegador';
+    video: { facingMode: 'environment', width: 1280, height: 720 }
+}).then(stream => {
+    cam.srcObject = stream;
+}).catch(() => {
+    alert('Permita a câmera! 📷');
 });
 
-// ==============================================================
-// CALIBRAÇÃO — CAPTURA A COR DA PEDRINHA
-// ==============================================================
-btnCalibrar.addEventListener('click', function () {
-    if (!contexto) return;
-    
-    statusSistema.textContent = '📸 Analisando cor... Mantenha a pedrinha bem visível!';
-    btnCalibrar.disabled = true;
-    btnCalibrar.style.opacity = '0.6';
-    
-    // Amostra a cor de forma estável
-    let somaR = 0, somaG = 0, somaB = 0, contagem = 0;
-    let quadrosColetados = 0;
-    const totalQuadros = 35;
-    
-    function coletarAmostra() {
-        if (quadrosColetados >= totalQuadros) {
-            corAlvo = {
-                r: Math.round(somaR / contagem),
-                g: Math.round(somaG / contagem),
-                b: Math.round(somaB / contagem)
-            };
-            
-            dadosPosicao.innerHTML = `🎯 Cor capturada: R${corAlvo.r} G${corAlvo.g} B${corAlvo.b}`;
-            iniciarRastreio();
-            return;
-        }
-        
-        contexto.drawImage(camera, 0, 0, canvas.width, canvas.height);
-        const imagem = contexto.getImageData(0, 0, canvas.width, canvas.height).data;
-        
-        // Amostra da área central onde o usuário coloca a pedrinha
-        const centroX = Math.floor(canvas.width / 2);
-        const centroY = Math.floor(canvas.height / 2);
-        const raioAmostra = 90;
-        
-        for (let y = centroY - raioAmostra; y < centroY + raioAmostra; y += 2) {
-            for (let x = centroX - raioAmostra; x < centroX + raioAmostra; x += 2) {
-                if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) continue;
-                
-                const indice = (y * canvas.width + x) * 4;
-                const r = imagem[indice];
-                const g = imagem[indice + 1];
-                const b = imagem[indice + 2];
-                
-                // Filtra pela cor predominante (vermelho/dourado)
-                if (r > g + 22 && r > b + 22 && r > 90) {
-                    somaR += r;
-                    somaG += g;
-                    somaB += b;
-                    contagem++;
-                }
-            }
-        }
-        
-        quadrosColetados++;
-        statusSistema.textContent = `Calibrando... ${quadrosColetados}/${totalQuadros}`;
-        requestAnimationFrame(coletarAmostra);
-    }
-    
-    coletarAmostra();
-});
+// === TOQUE / CLIQUE NA TELA ===
+document.addEventListener('touchstart', capturarToque, { passive: false });
+document.addEventListener('mousedown', capturarToque);
 
-// ==============================================================
-// INICIA O MODO DE RASTREIO
-// ==============================================================
-function iniciarRastreio() {
-    rastreioAtivo = true;
-    historicoPosicao = [];
-    
-    btnCalibrar.style.display = 'none';
-    btnParar.style.display = 'block';
-    btnReiniciar.style.display = 'block';
-    
-    cabecalho.innerHTML = '✅ ATIVO — A bolinha SEGUE a pedrinha em qualquer direção!';
-    statusSistema.textContent = '🎯 Rastreando... mova a pedrinha!';
-    
-    rastrearQuadro();
-}
+function capturarToque(e) {
+    e.preventDefault();
 
-// ==============================================================
-// COMPARAÇÃO DE COR — PEDRINHA DETECTADA?
-// ==============================================================
-function ehCorDaPedrinha(r, g, b) {
-    if (!corAlvo) return false;
-    
-    const diferencaR = Math.abs(r - corAlvo.r);
-    const diferencaG = Math.abs(g - corAlvo.g);
-    const diferencaB = Math.abs(b - corAlvo.b);
-    
-    // Confirma que é a cor alvo E tem predominância certa
-    const combina = diferencaR < TOLERANCIA_COR &&
-                    diferencaG < TOLERANCIA_COR &&
-                    diferencaB < TOLERANCIA_COR;
-    
-    const predominante = r > g + 18 && r > b + 18;
-    
-    return combina && predominante;
-}
-
-// ==============================================================
-// SUAVIZAÇÃO — MOVIMENTO NATURAL, SEM TREMER
-// ==============================================================
-function suavizarMovimento(novoX, novoY) {
-    historicoPosicao.push({ x: novoX, y: novoY });
-    
-    if (historicoPosicao.length > HISTORICO_TAMANHO) {
-        historicoPosicao.shift();
-    }
-    
-    let somaX = 0, somaY = 0;
-    for (let i = 0; i < historicoPosicao.length; i++) {
-        somaX += historicoPosicao[i].x;
-        somaY += historicoPosicao[i].y;
-    }
-    
-    return {
-        x: somaX / historicoPosicao.length,
-        y: somaY / historicoPosicao.length
-    };
-}
-
-// ==============================================================
-// POSICIONA A BOLINHA NO LOCAL EXATO
-// ==============================================================
-function mostrarAlvo(centroX, centroY) {
-    esconderTudo();
-    
-    const areaCamera = camera.getBoundingClientRect();
-    
-    // Converte coordenadas da imagem para tela
-    const posicaoX = (centroX / canvas.width) * areaCamera.width;
-    const posicaoY = (centroY / canvas.height) * areaCamera.height;
-    
-    // Suaviza antes de mostrar
-    const posicaoFinal = suavizarMovimento(posicaoX, posicaoY);
-    
-    // Determina o lado
-    let ladoTexto;
-    if (posicaoFinal.x < areaCamera.width * 0.333) {
-        ladoTexto = '⬅️ ESQUERDA';
-    } else if (posicaoFinal.x < areaCamera.width * 0.666) {
-        ladoTexto = '➡️ MEIO';
-    } else {
-        ladoTexto = '➡️ DIREITA';
-    }
-    
-    // COLOCA A BOLINHA — SEM AJUSTE FORÇADO, SEM TRAVA
-    marcador.style.display = 'block';
-    marcador.style.left = (posicaoFinal.x - 22) + 'px';
-    marcador.style.top = (posicaoFinal.y - 22) + 'px';
-    
-    dadosPosicao.innerHTML = `🎯 ${ladoTexto} | X:${Math.round(posicaoFinal.x)} Y:${Math.round(posicaoFinal.y)}`;
-    statusSistema.textContent = '✅ PEDRINHA LOCALIZADA — seguindo!';
-}
-
-function mostrarAusencia() {
-    esconderTudo();
-    historicoPosicao = [];
-    avisoNao.style.display = 'block';
-    dadosPosicao.innerHTML = '🔍 Aguardando pedrinha...';
-    statusSistema.textContent = '❌ Fora de visão';
-}
-
-function esconderTudo() {
-    marcador.style.display = 'none';
-    avisoNao.style.display = 'none';
-}
-
-// ==============================================================
-// CÉREBRO PRINCIPAL — ANÁLISE QUADRO POR QUADRO
-// ==============================================================
-function rastrearQuadro() {
-    if (!rastreioAtivo || !contexto || !corAlvo) {
-        requestAnimationFrame(rastrearQuadro);
+    // Se já está seguindo, parar e deixar escolher de novo
+    if (seguindo) {
+        pararSeguimento();
         return;
     }
-    
-    // Captura o quadro atual
-    contexto.drawImage(camera, 0, 0, canvas.width, canvas.height);
-    const imagem = contexto.getImageData(0, 0, canvas.width, canvas.height).data;
-    
-    // VARIÁVEIS DO QUADRO ATUAL — ZERAM A CADA INSTANTE
-    let somaPontosX = 0;
-    let somaPontosY = 0;
-    let quantidadePontos = 0;
-    
-    // VARRE TELA INTEIRA — de cima a baixo, de esquerda a direita
-    for (let y = 0; y < canvas.height; y += 1) {
-        for (let x = 0; x < canvas.width; x += 1) {
-            const indice = (y * canvas.width + x) * 4;
-            
-            if (ehCorDaPedrinha(imagem[indice], imagem[indice + 1], imagem[indice + 2])) {
-                somaPontosX += x;
-                somaPontosY += y;
-                quantidadePontos++;
-            }
-        }
-    }
-    
-    // TEMOS A PEDRINHA?
-    if (quantidadePontos >= PONTOS_CONFIRMACAO) {
-        // CENTRO DE MASSA REAL — onde os pontos estão agrupados
-        const centroX = somaPontosX / quantidadePontos;
-        const centroY = somaPontosY / quantidadePontos;
-        
-        // ✅ SEM TRAVA, SEM AJUSTE — DIRETO NO PONTO ENCONTRADO
-        mostrarAlvo(centroX, centroY);
+
+    // Pegar posição exata onde tocou
+    let x, y;
+    if (e.touches) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
     } else {
-        mostrarAusencia();
+        x = e.clientX;
+        y = e.clientY;
     }
-    
-    requestAnimationFrame(rastrearQuadro);
+
+    // Começar a seguir AQUI
+    alvoX = x;
+    alvoY = y;
+    historico = [];
+    seguindo = true;
+
+    // Mostrar gotinha
+    marcador.style.display = 'block';
+    posicaoGotinha(x, y);
+
+    // Atualizar telas
+    instrucao.innerHTML = '✅ SEGUINDO! Mova o copo que a gotinha acompanha';
+    status.innerHTML = `📍 Posição travada — mova o copo!`;
 }
 
-// ==============================================================
-// CONTROLES DE PARADA E REINÍCIO
-// ==============================================================
-btnParar.addEventListener('click', function () {
-    rastreioAtivo = false;
-    esconderTudo();
-    historicoPosicao = [];
-    
-    btnParar.style.display = 'none';
-    btnReiniciar.style.display = 'none';
-    btnCalibrar.style.display = 'block';
-    btnCalibrar.textContent = '▶️ CONTINUAR';
-    btnCalibrar.disabled = false;
-    btnCalibrar.style.opacity = '1';
-    
-    cabecalho.innerHTML = '⏸️ Pausado';
-    statusSistema.textContent = 'Clique para continuar';
-});
+// === MOVIMENTO — ACOMPANHA O ARRASTE ===
+document.addEventListener('touchmove', moverAlvo, { passive: false });
+document.addEventListener('mousemove', moverAlvo);
 
-btnReiniciar.addEventListener('click', function () {
-    rastreioAtivo = false;
-    corAlvo = null;
-    historicoPosicao = [];
-    esconderTudo();
-    
-    btnCalibrar.style.display = 'block';
-    btnCalibrar.textContent = '🚀 CALIBRAR E INICIAR';
-    btnCalibrar.disabled = false;
-    btnCalibrar.style.opacity = '1';
-    btnParar.style.display = 'none';
-    btnReiniciar.style.display = 'none';
-    
-    cabecalho.innerHTML = '🎯 RASTREIO PROFISSIONAL — novo início';
-    dadosPosicao.innerHTML = 'Calibre com a pedrinha visível';
-    statusSistema.textContent = '👁️ Mostre a pedrinha → CALIBRAR';
-});
+function moverAlvo(e) {
+    if (!seguindo) return;
+    e.preventDefault();
+
+    let x, y;
+    if (e.touches) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+    } else {
+        x = e.clientX;
+        y = e.clientY;
+    }
+
+    // Atualizar alvo com suavização
+    alvoX = x;
+    alvoY = y;
+
+    // Salvar no histórico para movimento suave
+    historico.push({ x, y });
+    if (historico.length > SUAVIZACAO) historico.shift();
+
+    // Calcular posição suavizada
+    let sx = 0, sy = 0;
+    for (let p of historico) { sx += p.x; sy += p.y; }
+    sx /= historico.length;
+    sy /= historico.length;
+
+    // Colocar gotinha
+    posicaoGotinha(sx, sy);
+}
+
+// === POSICIONAR A GOTINHA ===
+function posicaoGotinha(x, y) {
+    // Centralizar a gotinha no ponto tocado
+    marcador.style.left = (x - 26) + 'px';
+    marcador.style.top = (y - 48) + 'px'; // -48 = alinhar a ponta no ponto
+}
+
+// === PARAR SEGUIMENTO ===
+function pararSeguimento() {
+    seguindo = false;
+    marcador.style.display = 'none';
+    historico = [];
+    instrucao.innerHTML = '👆 TOQUE NO COPO NOVAMENTE PARA ESCOLHER';
+    status.innerHTML = 'Aguardando novo toque...';
+}
+
+// === BOTÃO RESETAR ===
+btnReset.addEventListener('click', pararSeguimento);
 </script>
 </body>
 </html>
