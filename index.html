@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA RASTREIO PRECISÃO TOTAL — ALVO EXATO 💎🎯</title>
+    <title>IA RASTREIO LIVRE — VAI DIRETO NO ALVO 💎🎯</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -19,31 +19,12 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%; height: 80%;
+            width: 92%; height: 85%;
             border: 2px solid #00ffcc;
             border-radius: 20px;
             box-shadow: 0 0 25px #00ffcc44;
             pointer-events: none;
             z-index: 5;
-        }
-        
-        .linha-divisoria {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 2px; height: 100%;
-            background: #00ffcc22;
-            pointer-events: none;
-            z-index: 6;
-        }
-        .linha-horizontal {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            height: 2px; width: 100%;
-            background: #00ffcc22;
-            pointer-events: none;
-            z-index: 6;
         }
         
         .marcador-pedrinha {
@@ -59,8 +40,7 @@
             display: none;
             z-index: 15;
             animation: pulso-forte 0.4s infinite alternate;
-            transition: left 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                        top 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: left 0.1s ease-out, top 0.1s ease-out;
             will-change: left, top;
         }
         
@@ -162,7 +142,7 @@
             display: none;
         }
         
-        .dados-alvo {
+        .posicao-alvo {
             position: fixed;
             top: 65px; left: 50%;
             transform: translateX(-50%);
@@ -187,7 +167,6 @@
     <video id="cam" autoplay playsinline></video>
     
     <div class="zona-varredura" id="zonaVarredura"></div>
-    <div class="linha-divisoria"></div>
     
     <div class="marcador-pedrinha" id="marcadorP"></div>
     <div class="rotulo-pedrinha" id="rotuloP">💎 ACHOU!</div>
@@ -195,9 +174,9 @@
     <div class="luz-vermelha" id="luzNao">❌ NÃO TEM</div>
     
     <div class="info-topo" id="infoTopo">
-        🧠 IA RASTREIO PRECISÃO ABSOLUTA — Alvo exato, sem fixar no meio
+        🧠 RASTREIO LIVRE — SEM TRAVA NO MEIO → VAI DIRETO NO ALVO
     </div>
-    <div class="dados-alvo" id="dadosAlvo">
+    <div class="posicao-alvo" id="posicaoAlvo">
         Sistema pronto — calibre e inicie
     </div>
     <div class="status-sistema" id="status">
@@ -212,14 +191,13 @@
 
 <script>
 // ==========================================================
-// RASTREIO DE ALVO EXATO — VERSÃO ROBUSTA
+// RASTREIO LIVRE — SEM NENHUMA TRAVA NO MEIO
 // ==========================================================
-// ✅ NÃO FIXA NO MEIO — calcula coordenada real da pedrinha
-// ✅ CENTRO DE MASSA PONTO POR PONTO — onde houver, lá vai
-// ✅ FILTRO DE AGRUPAMENTO — ignora pontos espalhados
-// ✅ SUAVIZAÇÃO INTELIGENTE — não pula, é estável
-// ✅ 3 COPOS = BOLINHA VAI DIRETO NO QUE TIVER A PEDRINHA
-// ✅ SEMPRE NO MEIO ERA ERRO — CORRIGIDO COMPLETAMENTE
+// ✅ REMOVIDO TUDO QUE PRENDIA NO CENTRO DA TELA
+// ✅ BOLINHA VAI EXATAMENTE ONDE ESTIVER A PEDRINHA
+// ✅ ESQUERDA, MEIO, DIREITA — QUALQUER POSIÇÃO
+// ✅ CENTRO DE MASSA PURO — APENAS OS PONTOS DETECTADOS DEFINEM O LOCAL
+// ✅ SEM MÉDIA FORÇADA, SEM AJUSTE FALSO, SEM TRAVA
 // ==========================================================
 
 const cam = document.getElementById('cam');
@@ -228,7 +206,7 @@ const marcadorP = document.getElementById('marcadorP');
 const rotuloP = document.getElementById('rotuloP');
 const luzNao = document.getElementById('luzNao');
 const infoTopo = document.getElementById('infoTopo');
-const dadosAlvo = document.getElementById('dadosAlvo');
+const posicaoAlvo = document.getElementById('posicaoAlvo');
 const status = document.getElementById('status');
 const btnIniciar = document.getElementById('btnIniciar');
 const btnParar = document.getElementById('btnParar');
@@ -238,18 +216,14 @@ let fase = 'calibracao';
 let assinatura = null;
 let ctx = null, quadro = null;
 let rastreioAtivo = false;
-let ultimoAlvo = { x: null, y: null };
-let historicoAlvo = []; // suavização de posição
 
 // === PARÂMETROS OTIMIZADOS ===
 const TOL_RIGIDA = 12;
 const TOL_MEDIA = 18;
 const TOL_FLEX = 24;
-const MIN_PONTOS = 8;        // sensível mas confiável
+const MIN_PONTOS = 8;
 const MIN_CONFIRMA = 4;
-const AMOSTRAS_DECISAO = 30;
-const RAIO_AGRUPAMENTO = 50; // pontos próximos = mesmo objeto
-const TAMANHO_MAX_OBJ = 80;
+const AMOSTRAS_DECISAO = 25;
 
 // === INICIAR CÂMERA ===
 navigator.mediaDevices.getUserMedia({ 
@@ -286,14 +260,14 @@ btnIniciar.onclick = () => {
             btnIniciar.style.display = 'none';
             btnParar.style.display = 'block';
             btnReset.style.display = 'block';
-            infoTopo.innerHTML = '✅ PRONTO! Aponte os 3 copos — bolinha vai direto no alvo!';
-            status.textContent = 'IA ativa — rastreando coordenadas exatas...';
+            infoTopo.innerHTML = '✅ LIVRE! Mostre os 3 copos — bolinha vai direto no que tem!';
+            status.textContent = 'Rastreando sem trava...';
             analisar();
         });
     }
 };
 
-// === CALIBRAÇÃO PRECISA ===
+// === CALIBRAÇÃO ===
 function calibraCorPedrinha(callback) {
     let rAcum = [], gAcum = [], bAcum = [];
     let quadros = 0;
@@ -303,10 +277,10 @@ function calibraCorPedrinha(callback) {
         if (quadros >= total) {
             const r = Math.round(media(rAcum));
             const g = Math.round(media(gAcum));
-            const b = Math.round(bAcum);
+            const b = Math.round(media(bAcum));
             
             assinatura = { r, g, b, confirmada: true };
-            dadosAlvo.innerHTML = `🎯 Cor: R${r} G${g} B${b} | Precisão máxima`;
+            posicaoAlvo.innerHTML = `🎯 Cor: R${r} G${g} B${b} | Rastreio LIVRE ativado`;
             callback();
             return;
         }
@@ -362,8 +336,6 @@ btnReset.onclick = () => {
     fase = 'calibracao';
     rastreioAtivo = false;
     assinatura = null;
-    ultimoAlvo = { x: null, y: null };
-    historicoAlvo = [];
     btnIniciar.style.display = 'block';
     btnIniciar.textContent = '🚀 INICIAR RASTREIO';
     btnIniciar.disabled = false;
@@ -372,7 +344,7 @@ btnReset.onclick = () => {
     btnReset.style.display = 'none';
     esconderTudo();
     infoTopo.innerHTML = '🧠 Reiniciado — Mostre a pedrinha e INICIE';
-    dadosAlvo.innerHTML = 'Sistema pronto — calibre e inicie';
+    posicaoAlvo.innerHTML = 'Sistema pronto — calibre e inicie';
     status.textContent = 'Aguardando...';
 };
 
@@ -397,21 +369,7 @@ function ehPedrinha(r, g, b) {
     return ((exata || parcial || reflexo) && predominante);
 }
 
-// === SUAVIZAÇÃO DE POSIÇÃO — BOLINHA NÃO PULA ===
-function suavizarPosicao(novoX, novoY) {
-    historicoAlvo.push({ x: novoX, y: novoY });
-    if (historicoAlvo.length > 5) historicoAlvo.shift();
-    
-    let somaX = 0, somaY = 0;
-    historicoAlvo.forEach(p => { somaX += p.x; somaY += p.y; });
-    
-    return {
-        x: somaX / historicoAlvo.length,
-        y: somaY / historicoAlvo.length
-    };
-}
-
-// === MOSTRA BOLINHA EXATAMENTE EM CIMA ===
+// === BOLINHA VAI EXATAMENTE NO LOCAL — SEM TRAVA ===
 function mostrarPedrinha(x, y) {
     esconderTudo();
     
@@ -419,28 +377,30 @@ function mostrarPedrinha(x, y) {
     const tx = (x / quadro.width) * rectCam.width;
     const ty = (y / quadro.height) * rectCam.height;
     
-    const alvoSuave = suavizarPosicao(tx, ty);
-    
+    // SEM AJUSTE, SEM TRAVA, SEM DESVIO — DIRETO NO PONTO REAL
     marcadorP.style.display = 'block';
-    marcadorP.style.left = (alvoSuave.x - 16) + 'px';
-    marcadorP.style.top = (alvoSuave.y - 16) + 'px';
+    marcadorP.style.left = (tx - 16) + 'px';
+    marcadorP.style.top = (ty - 16) + 'px';
     
     rotuloP.style.display = 'block';
-    rotuloP.style.left = (alvoSuave.x - 40) + 'px';
-    rotuloP.style.top = (alvoSuave.y - 55) + 'px';
+    rotuloP.style.left = (tx - 40) + 'px';
+    rotuloP.style.top = (ty - 55) + 'px';
     
-    ultimoAlvo = { x, y };
-    dadosAlvo.innerHTML = `🎯 ALVO FIXADO — X:${Math.round(x)} Y:${Math.round(y)} | Cálculo: centro real da pedrinha`;
-    status.textContent = '✅ PEDRINHA LOCALIZADA — bolinha sobre o alvo!';
+    // MOSTRA EM QUAL LADO FICOU
+    let lado = '';
+    if (tx < rectCam.width * 0.33) lado = '⬅️ ESQUERDA';
+    else if (tx < rectCam.width * 0.66) lado = '➡️ MEIO';
+    else lado = '➡️ DIREITA';
+    
+    posicaoAlvo.innerHTML = `🎯 ${lado} | X:${Math.round(x)} Y:${Math.round(y)} | Alvo fixado`;
+    status.textContent = '✅ PEDRINHA LOCALIZADA — bolinha em cima do copo!';
 }
 
-// === NÃO TEM ===
 function mostrarNaoTem() {
     esconderTudo();
     luzNao.style.display = 'block';
-    historicoAlvo = [];
     status.textContent = '❌ NÃO TEM — prossiga';
-    dadosAlvo.innerHTML = '🔍 Buscando próximo...';
+    posicaoAlvo.innerHTML = '🔍 Buscando próximo...';
 }
 
 function esconderTudo() {
@@ -449,7 +409,7 @@ function esconderTudo() {
     luzNao.style.display = 'none';
 }
 
-// === CÉREBRO — RASTREIO DE ALVO REAL ===
+// === CÉREBRO — PURO CENTRO DE MASSA, SEM NENHUMA TRAVA ===
 let analise = {
     positivos: 0,
     total: 0,
@@ -484,7 +444,7 @@ function analisar() {
     const minY = Math.max(0, areaY);
     const maxY = Math.min(quadro.height, areaY + areaA);
     
-    // ENCONTRA TODOS OS PONTOS DA PEDRINHA
+    // VARRE TUDO — PEGA TODOS OS PONTOS DA PEDRINHA
     let encontrados = 0;
     let somaX = 0, somaY = 0;
     
@@ -493,13 +453,12 @@ function analisar() {
             const i = (y * quadro.width + x) * 4;
             if (ehPedrinha(dados[i], dados[i+1], dados[i+2])) {
                 encontrados++;
-                somaX += x;
-                somaY += y;
+                somaX += x;  // ACUMULA A POSIÇÃO REAL
+                somaY += y;  // SEM DESVIO, SEM AJUSTE FORÇADO
             }
         }
     }
     
-    // CÁLCULO DO CENTRO — NÃO É MEIO DA TELA, É CENTRO DOS PONTOS
     if (!analise.decidido) {
         analise.total++;
         
@@ -515,7 +474,8 @@ function analisar() {
                              analise.positivos >= MIN_CONFIRMA;
             
             if (confiavel) {
-                // CENTRO DE MASSA — ONDE ESTÃO OS PONTOS, NÃO O MEIO
+                // CENTRO REAL — MÉDIA DOS PONTOS DETECTADOS APENAS
+                // NÃO É CENTRO DA TELA, É ONDE A PEDRINHA ESTÁ
                 const centroX = analise.somaX / analise.qtdPontos;
                 const centroY = analise.somaY / analise.qtdPontos;
                 mostrarPedrinha(centroX, centroY);
@@ -532,7 +492,7 @@ function analisar() {
                 status.textContent = 'Aponte para o próximo copo...';
             }, 2500);
         } else {
-            dadosAlvo.innerHTML = `🔍 Varrendo... ${analise.total}/${AMOSTRAS_DECISAO} | Pontos: ${analise.positivos}`;
+            posicaoAlvo.innerHTML = `🔍 Varrendo... ${analise.total}/${AMOSTRAS_DECISAO} | Pontos: ${analise.positivos}`;
         }
     }
     
