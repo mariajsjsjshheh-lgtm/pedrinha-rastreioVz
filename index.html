@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — CÂMERA LIGADA ✅</title>
+<title>COPOS — SEM DETECTAR O DEDO ✅</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -13,7 +13,6 @@
         top: 0; left: 0;
         width: 100%; height: 100%;
         object-fit: cover;
-        transform: scaleX(1);
     }
 
     .cobertura {
@@ -63,16 +62,8 @@
     button:active { transform: scale(0.96); }
 
     #btnMarcar { background: #9933ff; color: white; }
-    #btnReiniciar { background: #009688; color: white; display: none; }
     #btnReligar { background: #ff4444; color: white; }
-
-    .statusCam {
-        position: fixed; top: 80px; left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,80,120,0.8); color: #99eeff;
-        padding: 10px 20px; border-radius: 20px; font-size: 12px;
-        z-index: 200;
-    }
+    #btnReiniciar { background: #009688; color: white; display: none; }
 </style>
 </head>
 <body>
@@ -89,11 +80,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NO COPO COM A PEDRINHA
-    </div>
-
-    <div class="statusCam" id="statusCam">
-        📷 Ligando câmera...
+        👆 TOQUE LADO DE FORA DO COPO — NÃO TAPA O CENTRO
     </div>
 
     <div class="botoes">
@@ -108,7 +95,6 @@ const cRoxo = document.getElementById('cRoxo');
 const cPreto = document.getElementById('cPreto');
 const cAmarelo = document.getElementById('cAmarelo');
 const aviso = document.getElementById('aviso');
-const statusCam = document.getElementById('statusCam');
 const btnMarcar = document.getElementById('btnMarcar');
 const btnReligar = document.getElementById('btnReligar');
 const btnReiniciar = document.getElementById('btnReiniciar');
@@ -121,10 +107,12 @@ const alvo = {
     corRef: { r:0, g:0, b:0, tol:42 },
     x:0, y:0, imgX:0, imgY:0,
     velocX:0, velocY:0,
-    raioBusca:130,
+    raioBusca:110,
     resp:0.92,
     perdidos:0,
-    maxPerdidos:600
+    maxPerdidos:600,
+    // ZONA PROTEGIDA — ONDE O DEDO NÃO MEXE
+    raioIgnorarDedo:45
 };
 
 const coberturas = [
@@ -135,11 +123,7 @@ const coberturas = [
 
 async function ligarCamera() {
     try {
-        statusCam.innerHTML = '📷 Pedindo permissão...';
-        
-        if (streamAtual) {
-            streamAtual.getTracks().forEach(t => t.stop());
-        }
+        if (streamAtual) streamAtual.getTracks().forEach(t => t.stop());
 
         streamAtual = await navigator.mediaDevices.getUserMedia({
             video: {
@@ -152,28 +136,23 @@ async function ligarCamera() {
         });
 
         cam.srcObject = streamAtual;
-        
         await new Promise(res => cam.onloadedmetadata = res);
-        
+
         canvas = document.createElement('canvas');
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
 
-        statusCam.innerHTML = '✅ Câmera ligada!';
-        aviso.innerHTML = '✅ Câmera pronta — Toque no copo com a pedrinha';
-        
-        setTimeout(() => statusCam.style.opacity = '0', 2000);
+        aviso.innerHTML = '✅ PRONTO! Toque na PEDRA — sem tampar o meio!';
 
     } catch (erro) {
-        console.error(erro);
-        statusCam.innerHTML = '❌ Erro: ' + erro.message;
-        aviso.innerHTML = '⚠️ Dê permissão à câmera nas configurações do navegador';
-        alert('Permita a câmera! 📷\nVá em Configurações → Permissões → Câmera → Permitir');
+        alert('Permita a câmera! 📷');
     }
 }
 
-btnReligar.addEventListener('click', ligarCamera);
+// SALVA ONDE FOI TOCADO PRA IGNORAR O DEDO
+let toqueX = -9999;
+let toqueY = -9999;
 
 function marcarPedrinha(e) {
     e.preventDefault();
@@ -182,10 +161,14 @@ function marcarPedrinha(e) {
     const t = e.touches ? e.touches[0] : e;
     const rect = cam.getBoundingClientRect();
 
+    // ONDE O DEDO TOCU — GUARDA PRA IGNORAR DEPOIS
+    toqueX = (t.clientX / rect.width) * canvas.width;
+    toqueY = (t.clientY / rect.height) * canvas.height;
+
     alvo.x = t.clientX;
     alvo.y = t.clientY;
-    alvo.imgX = (alvo.x / rect.width) * canvas.width;
-    alvo.imgY = (alvo.y / rect.height) * canvas.height;
+    alvo.imgX = toqueX;
+    alvo.imgY = toqueY;
     alvo.marcado = true;
     alvo.perdidos = 0;
 
@@ -193,23 +176,35 @@ function marcarPedrinha(e) {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     let r=0, g=0, b=0, q=0;
 
-    for (let dy = -50; dy <= 50; dy += 2) {
-        for (let dx = -50; dx <= 50; dx += 2) {
+    // PEGA A COR AO REDOR — FORA DO DEDO
+    for (let dy = -55; dy <= 55; dy += 2) {
+        for (let dx = -55; dx <= 55; dx += 2) {
             const px = Math.round(alvo.imgX + dx);
             const py = Math.round(alvo.imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > 50) continue;
+            
+            // ✅ IGNORA O CENTRO — ONDE O DEDO TÁ TAPANDO
+            const dist = Math.hypot(dx, dy);
+            if (dist < alvo.raioIgnorarDedo) continue;
+            if (dist > 55) continue;
+
             const i = (py * canvas.width + px) * 4;
             r += dados[i]; g += dados[i+1]; b += dados[i+2]; q++;
         }
     }
 
-    alvo.corRef.r = Math.round(r / q);
-    alvo.corRef.g = Math.round(g / q);
-    alvo.corRef.b = Math.round(b / q);
+    if (q < 10) {
+        alvo.corRef.r = 128;
+        alvo.corRef.g = 128;
+        alvo.corRef.b = 128;
+    } else {
+        alvo.corRef.r = Math.round(r / q);
+        alvo.corRef.g = Math.round(g / q);
+        alvo.corRef.b = Math.round(b / q);
+    }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ MARCADO! EMBARALHE OS COPOS!';
+    aviso.innerHTML = '✅ MARCADO! Mexa os copos — as cores ficam grudadas!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -238,6 +233,10 @@ function rastrear() {
             const py = Math.round(centroY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
+
+            // ✅ NÃO OLHA ONDE O DEDO TAVA — FICA FORA
+            const distToque = Math.hypot(px - toqueX, py - toqueY);
+            if (distToque < alvo.raioIgnorarDedo * 0.7) continue;
 
             const i = (py * canvas.width + px) * 4;
             const dr = Math.abs(dados[i] - alvo.corRef.r);
@@ -269,6 +268,7 @@ function rastrear() {
         alvo.perdidos = 0;
     } else {
         alvo.perdidos++;
+        // SEGUE A DIREÇÃO — NÃO SOLTA MESMO SEM VER
         alvo.imgX += alvo.velocX;
         alvo.imgY += alvo.velocY;
         alvo.x = (alvo.imgX / canvas.width) * rect.width;
@@ -291,16 +291,14 @@ document.addEventListener('mousedown', marcarPedrinha);
 btnReiniciar.onclick = () => {
     alvo.marcado = false;
     alvo.velocX = alvo.velocY = 0;
+    toqueX = toqueY = -9999;
     coberturas.forEach(c => c.el.style.display = 'none');
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     btnReligar.style.display = 'block';
-    aviso.innerHTML = '👆 TOQUE NO COPO COM A PEDRINHA';
-    statusCam.style.opacity = '1';
-    statusCam.innerHTML = '📷 Pronto pra marcar';
+    aviso.innerHTML = '👆 TOQUE LADO DE FORA DO COPO — NÃO TAPA O CENTRO';
 };
 
-// LIGA AUTOMATICAMENTE AO ABRIR
 ligarCamera();
 </script>
 </body>
