@@ -3,112 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreador da Pedrinha 💎</title>
+    <title>Rastreador Exclusivo 💎</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
         
-        /* Câmera em tela cheia */
-        #camera {
+        video {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
         }
         
-        /* Marcador que segue a pedrinha */
-        #marcador {
+        .marcador {
             position: absolute;
-            width: 90px; height: 90px;
+            width: 80px; height: 80px;
             border: 4px solid #ffff00;
             border-radius: 50%;
-            box-shadow: 0 0 20px #ffff00, inset 0 0 15px #ffff0066;
+            box-shadow: 0 0 25px #ffff00, 0 0 40px #ffd00088;
             pointer-events: none;
             display: none;
             z-index: 10;
-            animation: pulso 1s infinite alternate;
+            transition: left 0.02s linear, top 0.02s linear;
+            animation: pulso 0.6s infinite alternate;
         }
         
-        #etiqueta {
+        .etiqueta {
             position: absolute;
             background: #ffff00;
             color: #000;
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            font-size: 14px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
             pointer-events: none;
             display: none;
             z-index: 11;
+            transition: left 0.02s linear, top 0.02s linear;
         }
         
-        /* Botões */
         .botoes {
             position: fixed;
-            bottom: 40px; left: 50%;
+            bottom: 35px; left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            display: flex; gap: 15px;
+            display: flex; gap: 12px;
         }
         
         button {
-            padding: 14px 28px;
-            font-size: 18px;
+            padding: 13px 26px;
+            font-size: 17px;
             font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
         
-        button:active { transform: scale(0.95); }
-        
-        #btnLocalizar {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
-            color: #000;
-        }
-        
-        #btnParar {
-            background: linear-gradient(135deg, #ff4444, #cc0000);
-            color: #fff;
-            display: none;
-        }
+        #btnLocalizar { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        #btnParar { background: linear-gradient(135deg, #ff3333, #bb0000); color: #fff; display: none; }
         
         .status {
             position: fixed;
-            top: 20px; left: 50%;
+            top: 15px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             color: #fff;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 30px;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 20;
         }
         
         @keyframes pulso {
             from { transform: scale(1); }
-            to { transform: scale(1.15); }
+            to { transform: scale(1.18); }
         }
     </style>
 </head>
 <body>
-    <video id="camera" autoplay playsinline></video>
+    <video id="cam" autoplay playsinline></video>
     
-    <div id="marcador"></div>
-    <div id="etiqueta">AQUI ESTÁ! 💎</div>
+    <div class="marcador" id="marcador"></div>
+    <div class="etiqueta" id="etiqueta">AQUI ESTÁ — MINHA PEDRINHA! 💎</div>
     
-    <div class="status" id="status">📷 Câmera pronta — aponte pra pedrinha</div>
+    <div class="status" id="status">📷 Permita a câmera → clique NA SUA pedrinha!</div>
     
     <div class="botoes">
         <button id="btnLocalizar">🎯 LOCALIZAR</button>
-        <button id="btnParar">🛑 PARAR RASTREAMENTO</button>
+        <button id="btnParar">🛑 PARAR</button>
     </div>
 
 <script>
-const video = document.getElementById('camera');
+const cam = document.getElementById('cam');
 const marcador = document.getElementById('marcador');
 const etiqueta = document.getElementById('etiqueta');
 const btnLocalizar = document.getElementById('btnLocalizar');
@@ -116,87 +104,161 @@ const btnParar = document.getElementById('btnParar');
 const status = document.getElementById('status');
 
 let rastreando = false;
-let ultimaPosicao = null;
+let alvo = null;
+let corReferencia = null; // A cor EXATA da pedrinha que VOCÊ marcou
+let ctx = null;
+let quadro = null;
 
-// Iniciar câmera
-async function iniciarCamera() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-        });
-        video.srcObject = stream;
-        await new Promise(res => video.onloadedmetadata = res);
-        status.textContent = '✅ Aponte pra pedrinha e clique em LOCALIZAR';
-    } catch (erro) {
-        status.textContent = '❌ Permita acesso à câmera!';
-        alert('Preciso da permissão da câmera pra funcionar! 📷');
+// Ligar câmera
+navigator.mediaDevices.getUserMedia({ 
+    video: { 
+        facingMode: 'environment',
+        width: { ideal: 720 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 60 }
     }
-}
+}).then(stream => {
+    cam.srcObject = stream;
+    cam.onloadedmetadata = () => {
+        quadro = document.createElement('canvas');
+        ctx = quadro.getContext('2d', { willReadFrequently: true });
+        quadro.width = cam.videoWidth;
+        quadro.height = cam.videoHeight;
+        status.textContent = '✅ PRONTO! Clique em LOCALIZAR e depois NA SUA pedrinha!';
+    };
+}).catch(() => {
+    status.textContent = '❌ Permita a câmera!';
+    alert('Dê permissão à câmera! 📷');
+});
 
-// Clicou pra localizar
-btnLocalizar.addEventListener('click', () => {
+btnLocalizar.onclick = () => {
     rastreando = true;
     btnLocalizar.style.display = 'none';
     btnParar.style.display = 'block';
-    status.textContent = '🔍 RASTREAMENTO ATIVO — não vai perder ela nunca!';
-    
-    // Pega a posição exata onde a pedrinha está agora
-    // Você clica em cima/perto dela e ele trava ali e segue
-    video.addEventListener('click', (e) => {
-        if (!rastreando) return;
-        
-        const rect = video.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        // Salva a posição alvo
-        ultimaPosicao = { x, y };
-        mostrarMarcador(x, y);
-    });
-    
-    // SIMULAÇÃO INTELIGENTE: Segue o movimento natural
-    // Na prática, acompanha a direção que a pedrinha anda
-    simularRastreamento();
-});
+    status.textContent = '👆 CLIQUE NA SUA PEDRINHA AGORA!';
+};
 
-btnParar.addEventListener('click', () => {
+// === AQUI MARCA A PEDRINHA EXATA ===
+cam.onclick = (e) => {
+    if (!rastreando || !ctx) return;
+    
+    const rect = cam.getBoundingClientRect();
+    const escalaX = quadro.width / rect.width;
+    const escalaY = quadro.height / rect.height;
+    
+    const xTela = e.clientX - rect.left;
+    const yTela = e.clientY - rect.top;
+    const xQuadro = xTela * escalaX;
+    const yQuadro = yTela * escalaY;
+    
+    // Captura a COR EXATA da pedrinha que você clicou
+    ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
+    const dados = ctx.getImageData(xQuadro | 0, yQuadro | 0, 1, 1).data;
+    
+    corReferencia = {
+        r: dados[0],
+        g: dados[1],
+        b: dados[2]
+    };
+    
+    alvo = {
+        x: xQuadro,
+        y: yQuadro,
+        vx: 0,
+        vy: 0
+    };
+    
+    cam.onclick = null; // Trava — não deixa trocar de pedrinha
+    status.textContent = '🔒 PEDRINHA MARCADA — OUTRAS SERÃO IGNORADAS!';
+};
+
+btnParar.onclick = () => {
     rastreando = false;
     marcador.style.display = 'none';
     etiqueta.style.display = 'none';
     btnLocalizar.style.display = 'block';
     btnParar.style.display = 'none';
-    status.textContent = '⏹️ Rastreamento parado — clique de novo pra começar';
-    ultimaPosicao = null;
-});
+    status.textContent = '⏹️ Parado — clique de novo';
+    alvo = null;
+    corReferencia = null;
+};
 
-function mostrarMarcador(x, y) {
+function mostrar(x, y) {
+    const rect = cam.getBoundingClientRect();
+    const telaX = x / quadro.width * rect.width;
+    const telaY = y / quadro.height * rect.height;
+    
     marcador.style.display = 'block';
     etiqueta.style.display = 'block';
     
-    marcador.style.left = (x - 45) + 'px';
-    marcador.style.top = (y - 45) + 'px';
+    marcador.style.left = (telaX - 40) + 'px';
+    marcador.style.top = (telaY - 40) + 'px';
     
-    etiqueta.style.left = (x - 40) + 'px';
-    etiqueta.style.top = (y - 100) + 'px';
+    etiqueta.style.left = (telaX - 60) + 'px';
+    etiqueta.style.top = (telaY - 105) + 'px';
 }
 
-// Faz o marcador andar junto com a pedrinha
-function simularRastreamento() {
-    if (!rastreando) return;
-    
-    // Aqui é onde a mágica acontece: ele acompanha o movimento
-    // Se a pedrinha andar pra direita, ele segue pra direita
-    if (ultimaPosicao) {
-        // Detecção de movimento simples: acompanha a posição
-        // Em uma versão mais avançada, usaria visão computacional
-        mostrarMarcador(ultimaPosicao.x, ultimaPosicao.y);
+// === COMPARA COR — SÓ ACEITA A QUE VOCÊ MARCOU ===
+function corIgual(r, g, b) {
+    if (!corReferencia) return false;
+    const tolerancia = 45; // Ajusta se precisar
+    return Math.abs(r - corReferencia.r) < tolerancia &&
+           Math.abs(g - corReferencia.g) < tolerancia &&
+           Math.abs(b - corReferencia.b) < tolerancia;
+}
+
+// === RASTREAMENTO EXCLUSIVO ===
+function rastrear() {
+    if (!rastreando || !alvo || !ctx || !corReferencia) {
+        requestAnimationFrame(rastrear);
+        return;
     }
     
-    requestAnimationFrame(simularRastreamento);
+    ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
+    const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
+    
+    const raioBusca = 110;
+    let somaX = 0, somaY = 0, cont = 0;
+    
+    const minX = Math.max(0, alvo.x - raioBusca) | 0;
+    const maxX = Math.min(quadro.width, alvo.x + raioBusca) | 0;
+    const minY = Math.max(0, alvo.y - raioBusca) | 0;
+    const maxY = Math.min(quadro.height, alvo.y + raioBusca) | 0;
+    
+    // SÓ PROCURA A COR QUE VOCÊ MARCOU — outras vermelhas são IGNORADAS!
+    for (let y = minY; y < maxY; y += 2) {
+        for (let x = minX; x < maxX; x += 2) {
+            const i = (y * quadro.width + x) * 4;
+            const r = dados[i], g = dados[i+1], b = dados[i+2];
+            
+            if (corIgual(r, g, b)) {
+                somaX += x;
+                somaY += y;
+                cont++;
+            }
+        }
+    }
+    
+    if (cont >= 4) {
+        const novoX = somaX / cont;
+        const novoY = somaY / cont;
+        
+        alvo.vx = novoX - alvo.x;
+        alvo.vy = novoY - alvo.y;
+        
+        alvo.x = novoX;
+        alvo.y = novoY;
+    } else {
+        // Perdeu de vista? Segue a direção e continua procurando ELA
+        alvo.x += alvo.vx * 1.5;
+        alvo.y += alvo.vy * 1.5;
+    }
+    
+    mostrar(alvo.x, alvo.y);
+    requestAnimationFrame(rastrear);
 }
 
-// Inicia tudo quando abrir
-iniciarCamera();
+rastrear();
 </script>
 </body>
 </html>
