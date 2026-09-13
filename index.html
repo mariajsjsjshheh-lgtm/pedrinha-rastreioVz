@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreador Fiel 💎🔒</title>
+    <title>Rastreador Inteligente 💎🧠</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -17,31 +17,43 @@
         
         .marcador {
             position: absolute;
-            width: 85px; height: 85px;
+            width: 90px; height: 90px;
             border: 4px solid #ffff00;
             border-radius: 50%;
-            box-shadow: 0 0 25px #ffff00, 0 0 45px #ffd000aa;
+            box-shadow: 0 0 30px #ffff00, 0 0 50px #ffd000cc;
             pointer-events: none;
             display: none;
             z-index: 10;
-            transition: left 0.015s linear, top 0.015s linear;
-            animation: pulso 0.5s infinite alternate;
+            transition: left 0.008s linear, top 0.008s linear;
+            animation: pulso 0.45s infinite alternate;
         }
         
         .etiqueta {
             position: absolute;
-            background: #ffff00;
+            background: linear-gradient(135deg, #ffff00, #ffd000);
             color: #000;
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 7px 16px;
+            border-radius: 25px;
             font-weight: bold;
             font-size: 14px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             pointer-events: none;
             display: none;
             z-index: 11;
-            transition: left 0.015s linear, top 0.015s linear;
+            transition: left 0.008s linear, top 0.008s linear;
             white-space: nowrap;
+        }
+        
+        .confianca {
+            position: fixed;
+            top: 55px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #0f0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 20;
         }
         
         .botoes {
@@ -69,7 +81,7 @@
             position: fixed;
             top: 15px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             color: #fff;
             padding: 10px 20px;
             border-radius: 30px;
@@ -88,12 +100,13 @@
     <video id="cam" autoplay playsinline></video>
     
     <div class="marcador" id="marcador"></div>
-    <div class="etiqueta" id="etiqueta">💎 MINHA PEDRINHA — SEMPRE A ELA!</div>
+    <div class="etiqueta" id="etiqueta">💎 AQUI ESTÁ — SEMPRE ELA!</div>
+    <div class="confianca" id="confianca">🧠 Confiança: —</div>
     
-    <div class="status" id="status">📷 Permita a câmera → clique em LOCALIZAR e depois NA SUA pedrinha!</div>
+    <div class="status" id="status">📷 Permita a câmera → marque sua pedrinha!</div>
     
     <div class="botoes">
-        <button id="btnLocalizar">🎯 LOCALIZAR MINHA PEDRINHA</button>
+        <button id="btnLocalizar">🎯 MARCAR MINHA PEDRINHA</button>
         <button id="btnParar">🛑 PARAR</button>
     </div>
 
@@ -101,22 +114,26 @@
 const cam = document.getElementById('cam');
 const marcador = document.getElementById('marcador');
 const etiqueta = document.getElementById('etiqueta');
+const confiancaEl = document.getElementById('confianca');
 const btnLocalizar = document.getElementById('btnLocalizar');
 const btnParar = document.getElementById('btnParar');
 const status = document.getElementById('status');
 
 let rastreando = false;
 let alvo = null;
-let corReferencia = null;
-let toleranciaCor = 35; // Mais rigoroso = menos confusão
-let ctx = null;
-let quadro = null;
+let corRef = null;
+let tolerancia = 30; // MAIS RÍGIDO = NÃO CONFUNDE
+let ctx = null, quadro = null;
 
-// Ligar câmera em alta velocidade
+// MEMÓRIA INTELIGENTE — prevê onde ela está mesmo escondida
+let memoriaMovimento = [];
+let previsaoAtiva = false;
+
+// Ligar câmera
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
-        width: { ideal: 720 },
+        width: { ideal: 854 },
         height: { ideal: 480 },
         frameRate: { ideal: 60 }
     }
@@ -127,7 +144,7 @@ navigator.mediaDevices.getUserMedia({
         ctx = quadro.getContext('2d', { willReadFrequently: true });
         quadro.width = cam.videoWidth;
         quadro.height = cam.videoHeight;
-        status.textContent = '✅ PRONTO! Clique em LOCALIZAR e depois NA SUA pedrinha!';
+        status.textContent = '✅ PRONTO! Clique e MARQUE A SUA PEDRINHA!';
     };
 }).catch(() => {
     status.textContent = '❌ Permita a câmera!';
@@ -138,88 +155,103 @@ btnLocalizar.onclick = () => {
     rastreando = true;
     btnLocalizar.style.display = 'none';
     btnParar.style.display = 'block';
-    status.textContent = '👆 CLIQUE EXATAMENTE NA SUA PEDRINHA AGORA!';
+    status.textContent = '👆 CLIQUE EXATAMENTE NA PEDRINHA AGORA!';
 };
 
-// === MARCA A PEDRINHA E PEGA SUA ASSINATURA EXATA ===
+// === MARCAÇÃO PRECISA ===
 cam.onclick = (e) => {
     if (!rastreando || !ctx) return;
     
     const rect = cam.getBoundingClientRect();
-    const escalaX = quadro.width / rect.width;
-    const escalaY = quadro.height / rect.height;
+    const escX = quadro.width / rect.width;
+    const escY = quadro.height / rect.height;
     
-    const xTela = e.clientX - rect.left;
-    const yTela = e.clientY - rect.top;
-    const xQ = xTela * escalaX;
-    const yQ = yTela * escalaY;
+    const x = (e.clientX - rect.left) * escX;
+    const y = (e.clientY - rect.top) * escY;
     
-    // Captura a cor EXATA da pedrinha que VOCÊ escolheu
+    // Captura COR EXATA com múltiplos pontos = assinatura única
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
-    // Pega a cor de vários pontos ao redor pra ter média mais fiel
-    let somaR = 0, somaG = 0, somaB = 0, pontos = 0;
-    for (let dy = -3; dy <= 3; dy += 2) {
-        for (let dx = -3; dx <= 3; dx += 2) {
-            const d = ctx.getImageData((xQ + dx) | 0, (yQ + dy) | 0, 1, 1).data;
-            somaR += d[0]; somaG += d[1]; somaB += d[2]; pontos++;
+    let r=0, g=0, b=0, n=0;
+    for(let dy=-4; dy<=4; dy+=2) {
+        for(let dx=-4; dx<=4; dx+=2) {
+            const p = ctx.getImageData((x+dx)|0, (y+dy)|0, 1, 1).data;
+            r += p[0]; g += p[1]; b += p[2]; n++;
         }
     }
+    corRef = { r: r/n, g: g/n, b: b/n };
     
-    corReferencia = {
-        r: somaR / pontos,
-        g: somaG / pontos,
-        b: somaB / pontos
-    };
+    alvo = { x, y, vx:0, vy:0, confianca: 100 };
+    memoriaMovimento = [{x, y, tempo: Date.now()}];
+    previsaoAtiva = false;
     
-    alvo = {
-        x: xQ,
-        y: yQ,
-        vx: 0,
-        vy: 0,
-        confirmado: true
-    };
-    
-    cam.onclick = null; // TRAVOU — só essa pedrinha agora!
-    status.textContent = '🔒 PEDRINHA MARCADA! SÓ ELA SERÁ RASTREADA — NENHUMA OUTRA!';
+    cam.onclick = null;
+    status.textContent = '🔒 PEDRINHA MARCADA! SÓ ELA — NENHUMA OUTRA!';
 };
 
 btnParar.onclick = () => {
     rastreando = false;
     marcador.style.display = 'none';
     etiqueta.style.display = 'none';
+    confiancaEl.textContent = '🧠 Confiança: —';
     btnLocalizar.style.display = 'block';
     btnParar.style.display = 'none';
-    status.textContent = '⏹️ Parado — clique de novo pra marcar';
-    alvo = null;
-    corReferencia = null;
+    status.textContent = '⏹️ Parado — marque de novo';
+    alvo = corRef = null;
+    memoriaMovimento = [];
 };
 
-function mostrar(x, y) {
+function mostrar(x, y, conf) {
     const rect = cam.getBoundingClientRect();
-    const telaX = x / quadro.width * rect.width;
-    const telaY = y / quadro.height * rect.height;
+    const tx = x / quadro.width * rect.width;
+    const ty = y / quadro.height * rect.height;
     
     marcador.style.display = 'block';
     etiqueta.style.display = 'block';
     
-    marcador.style.left = (telaX - 42) + 'px';
-    marcador.style.top = (telaY - 42) + 'px';
+    marcador.style.left = (tx - 45) + 'px';
+    marcador.style.top = (ty - 45) + 'px';
     
-    etiqueta.style.left = (telaX - 80) + 'px';
-    etiqueta.style.top = (telaY - 115) + 'px';
+    etiqueta.style.left = (tx - 75) + 'px';
+    etiqueta.style.top = (ty - 115) + 'px';
+    
+    confiancaEl.textContent = `🧠 Confiança: ${Math.round(conf)}%`;
+    confiancaEl.style.color = conf > 70 ? '#0f0' : conf > 40 ? '#ff0' : '#f50';
 }
 
-// === COMPARA COR — SÓ ACEITA A EXATA QUE VOCÊ MARCOU ===
-function ehAPedrinha(r, g, b) {
-    if (!corReferencia) return false;
-    return Math.abs(r - corReferencia.r) < toleranciaCor &&
-           Math.abs(g - corReferencia.g) < toleranciaCor &&
-           Math.abs(b - corReferencia.b) < toleranciaCor;
+// === VERIFICA SE É A PEDRINHA CERTA ===
+function ehPedrinha(r, g, b) {
+    if (!corRef) return false;
+    return Math.abs(r - corRef.r) < tolerancia &&
+           Math.abs(g - corRef.g) < tolerancia &&
+           Math.abs(b - corRef.b) < tolerancia;
 }
 
-// === O CÉREBRO — SEGUE ELA PRA QUALQUER LUGAR ===
+// === CÁLCULO DE PREVISÃO INTELIGENTE ===
+function preverPosicao() {
+    if (memoriaMovimento.length < 3) return null;
+    
+    // Pega os últimos movimentos e calcula trajetória
+    const recentes = memoriaMovimento.slice(-8);
+    let dx=0, dy=0;
+    for(let i=1; i<recentes.length; i++) {
+        dx += recentes[i].x - recentes[i-1].x;
+        dy += recentes[i].y - recentes[i-1].y;
+    }
+    dx /= recentes.length - 1;
+    dy /= recentes.length - 1;
+    
+    // Preve onde DEVE estar mesmo escondida
+    return {
+        x: alvo.x + dx * 1.5,
+        y: alvo.y + dy * 1.5,
+        vx: dx,
+        vy: dy
+    };
+}
+
+// === RASTREAMENTO INTELIGENTE ===
 function rastrear() {
-    if (!rastreando || !alvo || !corReferencia || !ctx) {
+    if (!rastreando || !alvo || !corRef || !ctx) {
         requestAnimationFrame(rastrear);
         return;
     }
@@ -227,24 +259,25 @@ function rastrear() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    // Área de busca: EXPANDIU conforme a velocidade — não deixa escapar
-    const velocidade = Math.hypot(alvo.vx, alvo.vy);
-    const raioBusca = Math.max(80, 120 + velocidade * 3);
+    // Área de busca DINÂMICA — maior se movendo rápido
+    const vel = Math.hypot(alvo.vx, alvo.vy);
+    const raio = Math.max(90, 130 + vel * 4);
     
-    let somaX = 0, somaY = 0, cont = 0;
+    let somaX=0, somaY=0, cont=0;
+    let melhorConfianca = 0;
     
-    const minX = Math.max(0, alvo.x - raioBusca) | 0;
-    const maxX = Math.min(quadro.width, alvo.x + raioBusca) | 0;
-    const minY = Math.max(0, alvo.y - raioBusca) | 0;
-    const maxY = Math.min(quadro.height, alvo.y + raioBusca) | 0;
+    const minX = Math.max(0, alvo.x - raio) | 0;
+    const maxX = Math.min(quadro.width, alvo.x + raio) | 0;
+    const minY = Math.max(0, alvo.y - raio) | 0;
+    const maxY = Math.min(quadro.height, alvo.y + raio) | 0;
     
-    // SÓ PROCURA A PEDRINHA COM A COR EXATA — OUTRAS SÃO IGNORADAS COMPLETAMENTE
+    // BUSCA ELEITA — só a cor certa conta
     for (let y = minY; y < maxY; y += 2) {
         for (let x = minX; x < maxX; x += 2) {
             const i = (y * quadro.width + x) * 4;
             const r = dados[i], g = dados[i+1], b = dados[i+2];
             
-            if (ehAPedrinha(r, g, b)) {
+            if (ehPedrinha(r, g, b)) {
                 somaX += x;
                 somaY += y;
                 cont++;
@@ -253,29 +286,63 @@ function rastrear() {
     }
     
     if (cont >= 3) {
-        // ENCONTROU A MINHA PEDRINHA! Atualiza posição RÁPIDO
+        // ENCONTROU VISÍVEL — atualiza com confiança MÁXIMA
         const novoX = somaX / cont;
         const novoY = somaY / cont;
         
-        // Calcula velocidade real pra saber pra onde ela vai
-        alvo.vx = (novoX - alvo.x) * 0.8;
-        alvo.vy = (novoY - alvo.y) * 0.8;
+        // CÁLCULO DE CONFIANÇA — DECIDE UMA VEZ
+        const dist = Math.hypot(novoX - alvo.x, novoY - alvo.y);
+        const confianca = dist < raio * 0.5 ? 100 : Math.max(60, 100 - dist * 0.15);
         
-        alvo.x = novoX;
-        alvo.y = novoY;
+        // MOVIMENTO SUAVE — NÃO FICA DIVIDIDO
+        const suavidade = confianca > 80 ? 0.7 : 0.35;
+        alvo.x += (novoX - alvo.x) * suavidade;
+        alvo.y += (novoY - alvo.y) * suavidade;
+        
+        alvo.vx = (novoX - alvo.x) * 0.5;
+        alvo.vy = (novoY - alvo.y) * 0.5;
+        alvo.confianca = confianca;
+        
+        // GUARDA HISTÓRICO INTELIGENTE
+        memoriaMovimento.push({x: alvo.x, y: alvo.y, tempo: Date.now()});
+        if (memoriaMovimento.length > 20) memoriaMovimento.shift();
+        previsaoAtiva = false;
+        
     } else {
-        // NÃO VIU MAS SABE PRA ONDE FOI → SEGUE A DIREÇÃO!
-        alvo.x += alvo.vx;
-        alvo.y += alvo.vy;
-        
-        // Se saiu da tela, reduz velocidade e continua procurando
-        if (alvo.x < 0 || alvo.x > quadro.width || alvo.y < 0 || alvo.y > quadro.height) {
-            alvo.vx *= 0.95;
-            alvo.vy *= 0.95;
+        // ESCONDIDA! USA INTELIGÊNCIA PRA SABER ONDE ESTÁ
+        const prev = preverPosicao();
+        if (prev) {
+            if (!previsaoAtiva) {
+                previsaoAtiva = true;
+                status.textContent = '🧠 Escondida — prevendo trajetória...';
+            }
+            
+            // SEGUE A PREVISÃO — SABE PRA ONDE FOI
+            alvo.x += prev.vx * 1.2;
+            alvo.y += prev.vy * 1.2;
+            alvo.confianca = Math.max(45, alvo.confianca - 0.8);
+            
+            // Se saiu da tela, procura na direção lógica
+            if (alvo.x < 0) alvo.x = 0;
+            if (alvo.x > quadro.width) alvo.x = quadro.width;
+            if (alvo.y < 0) alvo.y = 0;
+            if (alvo.y > quadro.height) alvo.y = quadro.height;
+            
+        } else {
+            // Sem memória suficiente — segue devagar
+            alvo.x += alvo.vx;
+            alvo.y += alvo.vy;
+            alvo.confianca = Math.max(30, alvo.confianca - 0.5);
         }
     }
     
-    mostrar(alvo.x, alvo.y);
+    // NÃO DEIXA SUBIR SOZINHO — fixa na trajetória real
+    if (alvo.confianca < 25) {
+        alvo.vx *= 0.9;
+        alvo.vy *= 0.9;
+    }
+    
+    mostrar(alvo.x, alvo.y, alvo.confianca);
     requestAnimationFrame(rastrear);
 }
 
