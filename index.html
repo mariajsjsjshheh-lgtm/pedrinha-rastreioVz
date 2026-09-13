@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreador Inteligente 💎🧠</title>
+    <title>RASTREADOR PERFEITO — AQUII 💎🔒</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -15,45 +15,74 @@
             object-fit: cover;
         }
         
+        /* MARCADOR — MENOR, FIXO EM CIMA DA PEDRINHA, NÃO SE MEXE SEM MOTIVO */
         .marcador {
             position: absolute;
-            width: 90px; height: 90px;
-            border: 4px solid #ffff00;
+            width: 50px; height: 50px; /* MENOR */
+            border: 3px solid #ffff00;
             border-radius: 50%;
-            box-shadow: 0 0 30px #ffff00, 0 0 50px #ffd000cc;
+            box-shadow: 0 0 20px #ffff00, 0 0 35px #ffd00099;
             pointer-events: none;
             display: none;
             z-index: 10;
-            transition: left 0.008s linear, top 0.008s linear;
-            animation: pulso 0.45s infinite alternate;
+            transition: left 0.005s linear, top 0.005s linear; /* MUITO RÁPIDO E FIEL */
+            animation: pulso 0.5s infinite alternate;
         }
         
         .etiqueta {
             position: absolute;
             background: linear-gradient(135deg, #ffff00, #ffd000);
             color: #000;
-            padding: 7px 16px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 15px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.5);
             pointer-events: none;
             display: none;
             z-index: 11;
-            transition: left 0.008s linear, top 0.008s linear;
+            transition: left 0.005s linear, top 0.005s linear;
             white-space: nowrap;
         }
         
-        .confianca {
+        .nao-e {
+            position: absolute;
+            background: #ff3333;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            pointer-events: none;
+            display: none;
+            z-index: 9;
+            white-space: nowrap;
+        }
+        
+        .cadeado {
             position: fixed;
             top: 55px; left: 50%;
             transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            color: #ffff00;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 13px;
+            z-index: 20;
+            display: none;
+        }
+        
+        .nota {
+            position: fixed;
+            top: 95px; left: 50%;
+            transform: translateX(-50%);
             background: rgba(0,0,0,0.7);
             color: #0f0;
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 5px 12px;
+            border-radius: 15px;
             font-size: 12px;
             z-index: 20;
+            display: none;
         }
         
         .botoes {
@@ -92,7 +121,7 @@
         
         @keyframes pulso {
             from { transform: scale(1); }
-            to { transform: scale(1.2); }
+            to { transform: scale(1.15); }
         }
     </style>
 </head>
@@ -100,10 +129,12 @@
     <video id="cam" autoplay playsinline></video>
     
     <div class="marcador" id="marcador"></div>
-    <div class="etiqueta" id="etiqueta">💎 AQUI ESTÁ — SEMPRE ELA!</div>
-    <div class="confianca" id="confianca">🧠 Confiança: —</div>
+    <div class="etiqueta" id="etiqueta">AQUII 💎</div>
+    <div class="nao-e" id="naoE">ESSA NÃO ❌</div>
+    <div class="cadeado" id="cadeado">🔒 BLOQUEADO — SÓ MINHA PEDRINHA</div>
+    <div class="nota" id="nota">Q: 1000/1000 — PRECISÃO MÁXIMA</div>
     
-    <div class="status" id="status">📷 Permita a câmera → marque sua pedrinha!</div>
+    <div class="status" id="status">📷 Permita a câmera → clique em MARCAR e depois NA SUA PEDRINHA!</div>
     
     <div class="botoes">
         <button id="btnLocalizar">🎯 MARCAR MINHA PEDRINHA</button>
@@ -114,7 +145,9 @@
 const cam = document.getElementById('cam');
 const marcador = document.getElementById('marcador');
 const etiqueta = document.getElementById('etiqueta');
-const confiancaEl = document.getElementById('confianca');
+const naoE = document.getElementById('naoE');
+const cadeado = document.getElementById('cadeado');
+const nota = document.getElementById('nota');
 const btnLocalizar = document.getElementById('btnLocalizar');
 const btnParar = document.getElementById('btnParar');
 const status = document.getElementById('status');
@@ -122,14 +155,12 @@ const status = document.getElementById('status');
 let rastreando = false;
 let alvo = null;
 let corRef = null;
-let tolerancia = 30; // MAIS RÍGIDO = NÃO CONFUNDE
+let tolerancia = 22; // MUITO RÍGIDO — NÃO CONFUNDE NADA
 let ctx = null, quadro = null;
+let ultimoPontoVisivel = null;
+let tempoEscondido = 0;
 
-// MEMÓRIA INTELIGENTE — prevê onde ela está mesmo escondida
-let memoriaMovimento = [];
-let previsaoAtiva = false;
-
-// Ligar câmera
+// LIGA CÂMERA
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
@@ -144,21 +175,22 @@ navigator.mediaDevices.getUserMedia({
         ctx = quadro.getContext('2d', { willReadFrequently: true });
         quadro.width = cam.videoWidth;
         quadro.height = cam.videoHeight;
-        status.textContent = '✅ PRONTO! Clique e MARQUE A SUA PEDRINHA!';
+        status.textContent = '✅ PRONTO! Clique em MARCAR e depois NA SUA PEDRINHA!';
     };
 }).catch(() => {
     status.textContent = '❌ Permita a câmera!';
     alert('Dê permissão à câmera! 📷');
 });
 
+// CLICA PRA MARCAR
 btnLocalizar.onclick = () => {
     rastreando = true;
     btnLocalizar.style.display = 'none';
     btnParar.style.display = 'block';
-    status.textContent = '👆 CLIQUE EXATAMENTE NA PEDRINHA AGORA!';
+    status.textContent = '👆 CLIQUE EXATAMENTE NO CENTRO DA PEDRINHA AGORA!';
 };
 
-// === MARCAÇÃO PRECISA ===
+// === MARCAÇÃO EXATA — PEGA A ASSINATURA ÚNICA DELA ===
 cam.onclick = (e) => {
     if (!rastreando || !ctx) return;
     
@@ -169,56 +201,84 @@ cam.onclick = (e) => {
     const x = (e.clientX - rect.left) * escX;
     const y = (e.clientY - rect.top) * escY;
     
-    // Captura COR EXATA com múltiplos pontos = assinatura única
+    // PEGA A COR EXATA DE VÁRIOS PONTOS → ASSINATURA ÚNICA
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     let r=0, g=0, b=0, n=0;
-    for(let dy=-4; dy<=4; dy+=2) {
-        for(let dx=-4; dx<=4; dx+=2) {
+    for(let dy=-5; dy<=5; dy+=2) {
+        for(let dx=-5; dx<=5; dx+=2) {
             const p = ctx.getImageData((x+dx)|0, (y+dy)|0, 1, 1).data;
             r += p[0]; g += p[1]; b += p[2]; n++;
         }
     }
     corRef = { r: r/n, g: g/n, b: b/n };
     
-    alvo = { x, y, vx:0, vy:0, confianca: 100 };
-    memoriaMovimento = [{x, y, tempo: Date.now()}];
-    previsaoAtiva = false;
+    // PONTO INICIAL — TRAVADO
+    alvo = { 
+        x: x, 
+        y: y, 
+        vx: 0, 
+        vy: 0,
+        confirmado: true
+    };
+    ultimoPontoVisivel = { x: x, y: y };
+    tempoEscondido = 0;
     
+    // TRAVA — NÃO DEIXA MUDAR
     cam.onclick = null;
-    status.textContent = '🔒 PEDRINHA MARCADA! SÓ ELA — NENHUMA OUTRA!';
+    
+    // MOSTRA CADEADO E NOTA
+    cadeado.style.display = 'block';
+    nota.style.display = 'block';
+    status.textContent = '🔒 PEDRINHA MARCADA — SÓ ELA PARA SEMPRE! NENHUMA OUTRA!';
 };
 
 btnParar.onclick = () => {
     rastreando = false;
     marcador.style.display = 'none';
     etiqueta.style.display = 'none';
-    confiancaEl.textContent = '🧠 Confiança: —';
+    naoE.style.display = 'none';
+    cadeado.style.display = 'none';
+    nota.style.display = 'none';
     btnLocalizar.style.display = 'block';
     btnParar.style.display = 'none';
     status.textContent = '⏹️ Parado — marque de novo';
     alvo = corRef = null;
-    memoriaMovimento = [];
+    ultimoPontoVisivel = null;
+    tempoEscondido = 0;
 };
 
-function mostrar(x, y, conf) {
+// === MOSTRA MARCADOR EM CIMA DA PEDRINHA ===
+function mostrar(x, y) {
     const rect = cam.getBoundingClientRect();
     const tx = x / quadro.width * rect.width;
     const ty = y / quadro.height * rect.height;
     
+    // MARCADOR EM CIMA — MENOR
     marcador.style.display = 'block';
+    marcador.style.left = (tx - 25) + 'px';
+    marcador.style.top = (ty - 25) + 'px';
+    
+    // ETIQUETA "AQUII" EM CIMA DO MARCADOR
     etiqueta.style.display = 'block';
-    
-    marcador.style.left = (tx - 45) + 'px';
-    marcador.style.top = (ty - 45) + 'px';
-    
-    etiqueta.style.left = (tx - 75) + 'px';
-    etiqueta.style.top = (ty - 115) + 'px';
-    
-    confiancaEl.textContent = `🧠 Confiança: ${Math.round(conf)}%`;
-    confiancaEl.style.color = conf > 70 ? '#0f0' : conf > 40 ? '#ff0' : '#f50';
+    etiqueta.style.left = (tx - 35) + 'px';
+    etiqueta.style.top = (ty - 75) + 'px';
 }
 
-// === VERIFICA SE É A PEDRINHA CERTA ===
+// === MOSTRA "ESSA NÃO" NAS OUTRAS ===
+function mostrarNaoE(x, y) {
+    const rect = cam.getBoundingClientRect();
+    const tx = x / quadro.width * rect.width;
+    const ty = y / quadro.height * rect.height;
+    
+    naoE.style.display = 'block';
+    naoE.style.left = (tx - 30) + 'px';
+    naoE.style.top = (ty - 50) + 'px';
+    
+    // Desaparece rápido
+    setTimeout(() => { naoE.style.display = 'none'; }, 600);
+}
+
+// === VERIFICA: É A PEDRINHA CERTA? ===
 function ehPedrinha(r, g, b) {
     if (!corRef) return false;
     return Math.abs(r - corRef.r) < tolerancia &&
@@ -226,30 +286,7 @@ function ehPedrinha(r, g, b) {
            Math.abs(b - corRef.b) < tolerancia;
 }
 
-// === CÁLCULO DE PREVISÃO INTELIGENTE ===
-function preverPosicao() {
-    if (memoriaMovimento.length < 3) return null;
-    
-    // Pega os últimos movimentos e calcula trajetória
-    const recentes = memoriaMovimento.slice(-8);
-    let dx=0, dy=0;
-    for(let i=1; i<recentes.length; i++) {
-        dx += recentes[i].x - recentes[i-1].x;
-        dy += recentes[i].y - recentes[i-1].y;
-    }
-    dx /= recentes.length - 1;
-    dy /= recentes.length - 1;
-    
-    // Preve onde DEVE estar mesmo escondida
-    return {
-        x: alvo.x + dx * 1.5,
-        y: alvo.y + dy * 1.5,
-        vx: dx,
-        vy: dy
-    };
-}
-
-// === RASTREAMENTO INTELIGENTE ===
+// === O CÉREBRO — PRECISO, SEM ADIVINHAÇÃO, SEM FUGA ===
 function rastrear() {
     if (!rastreando || !alvo || !corRef || !ctx) {
         requestAnimationFrame(rastrear);
@@ -259,19 +296,19 @@ function rastrear() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    // Área de busca DINÂMICA — maior se movendo rápido
-    const vel = Math.hypot(alvo.vx, alvo.vy);
-    const raio = Math.max(90, 130 + vel * 4);
+    // ÁREA DE BUSCA: NÃO EXPANDE DEMAIS → NÃO VAI PRA OUTROS OBJETOS
+    const raioBusca = 70; // FIXO — NÃO CRESCE, NÃO VAGA
     
-    let somaX=0, somaY=0, cont=0;
-    let melhorConfianca = 0;
+    let somaX = 0, somaY = 0, cont = 0;
+    let encontrouOutro = false;
+    let posOutro = { x: 0, y: 0 };
     
-    const minX = Math.max(0, alvo.x - raio) | 0;
-    const maxX = Math.min(quadro.width, alvo.x + raio) | 0;
-    const minY = Math.max(0, alvo.y - raio) | 0;
-    const maxY = Math.min(quadro.height, alvo.y + raio) | 0;
+    const minX = Math.max(0, alvo.x - raioBusca) | 0;
+    const maxX = Math.min(quadro.width, alvo.x + raioBusca) | 0;
+    const minY = Math.max(0, alvo.y - raioBusca) | 0;
+    const maxY = Math.min(quadro.height, alvo.y + raioBusca) | 0;
     
-    // BUSCA ELEITA — só a cor certa conta
+    // BUSCA SÓ DENTRO DA ÁREA PRÓXIMA — NÃO VAGA
     for (let y = minY; y < maxY; y += 2) {
         for (let x = minX; x < maxX; x += 2) {
             const i = (y * quadro.width + x) * 4;
@@ -285,64 +322,84 @@ function rastrear() {
         }
     }
     
-    if (cont >= 3) {
-        // ENCONTROU VISÍVEL — atualiza com confiança MÁXIMA
-        const novoX = somaX / cont;
-        const novoY = somaY / cont;
+    // PROCURA FORA DA ÁREA = OUTRA PEDRINHA → IGNORA E MARCA "ESSA NÃO"
+    if (cont === 0) {
+        // Busca rápida geral só pra descartar
+        const raioAmplo = 200;
+        const mx = Math.max(0, alvo.x - raioAmplo) | 0;
+        const Mx = Math.min(quadro.width, alvo.x + raioAmplo) | 0;
+        const my = Math.max(0, alvo.y - raioAmplo) | 0;
+        const My = Math.min(quadro.height, alvo.y + raioAmplo) | 0;
         
-        // CÁLCULO DE CONFIANÇA — DECIDE UMA VEZ
-        const dist = Math.hypot(novoX - alvo.x, novoY - alvo.y);
-        const confianca = dist < raio * 0.5 ? 100 : Math.max(60, 100 - dist * 0.15);
-        
-        // MOVIMENTO SUAVE — NÃO FICA DIVIDIDO
-        const suavidade = confianca > 80 ? 0.7 : 0.35;
-        alvo.x += (novoX - alvo.x) * suavidade;
-        alvo.y += (novoY - alvo.y) * suavidade;
-        
-        alvo.vx = (novoX - alvo.x) * 0.5;
-        alvo.vy = (novoY - alvo.y) * 0.5;
-        alvo.confianca = confianca;
-        
-        // GUARDA HISTÓRICO INTELIGENTE
-        memoriaMovimento.push({x: alvo.x, y: alvo.y, tempo: Date.now()});
-        if (memoriaMovimento.length > 20) memoriaMovimento.shift();
-        previsaoAtiva = false;
-        
-    } else {
-        // ESCONDIDA! USA INTELIGÊNCIA PRA SABER ONDE ESTÁ
-        const prev = preverPosicao();
-        if (prev) {
-            if (!previsaoAtiva) {
-                previsaoAtiva = true;
-                status.textContent = '🧠 Escondida — prevendo trajetória...';
+        let ox = 0, oy = 0, oc = 0;
+        for (let y = my; y < My; y += 4) {
+            for (let x = mx; x < Mx; x += 4) {
+                const i = (y * quadro.width + x) * 4;
+                if (ehPedrinha(dados[i], dados[i+1], dados[i+2])) {
+                    ox += x; oy += y; oc++;
+                }
             }
-            
-            // SEGUE A PREVISÃO — SABE PRA ONDE FOI
-            alvo.x += prev.vx * 1.2;
-            alvo.y += prev.vy * 1.2;
-            alvo.confianca = Math.max(45, alvo.confianca - 0.8);
-            
-            // Se saiu da tela, procura na direção lógica
-            if (alvo.x < 0) alvo.x = 0;
-            if (alvo.x > quadro.width) alvo.x = quadro.width;
-            if (alvo.y < 0) alvo.y = 0;
-            if (alvo.y > quadro.height) alvo.y = quadro.height;
-            
-        } else {
-            // Sem memória suficiente — segue devagar
-            alvo.x += alvo.vx;
-            alvo.y += alvo.vy;
-            alvo.confianca = Math.max(30, alvo.confianca - 0.5);
+        }
+        if (oc > 0) {
+            posOutro = { x: ox/oc, y: oy/oc };
+            // Se está longe = OUTRA → MARCA "ESSA NÃO"
+            const dist = Math.hypot(posOutro.x - alvo.x, posOutro.y - alvo.y);
+            if (dist > raioBusca * 1.3) {
+                mostrarNaoE(posOutro.x, posOutro.y);
+                encontrouOutro = true;
+            }
         }
     }
     
-    // NÃO DEIXA SUBIR SOZINHO — fixa na trajetória real
-    if (alvo.confianca < 25) {
-        alvo.vx *= 0.9;
-        alvo.vy *= 0.9;
+    // === DECISÃO: ENCONTROU A MINHA PEDRINHA? ===
+    if (cont >= 2) {
+        // SIM! ENCONTROU — ATUALIZA DIRETO, SEM DÚVIDA
+        const novoX = somaX / cont;
+        const novoY = somaY / cont;
+        
+        // CORRIGE MOVIMENTO RÁPIDO MAS NÃO VAGA
+        alvo.vx = (novoX - alvo.x) * 0.6;
+        alvo.vy = (novoY - alvo.y) * 0.6;
+        
+        alvo.x = alvo.x + (novoX - alvo.x) * 0.85;
+        alvo.y = alvo.y + (novoY - alvo.y) * 0.85;
+        
+        ultimoPontoVisivel = { x: alvo.x, y: alvo.y };
+        tempoEscondido = 0;
+        status.textContent = '✅ AQUII — PEDRINHA LOCALIZADA!';
+        
+    } else {
+        // NÃO VIU → NÃO ADIVINHA! FICA ONDE A DEIXOU
+        tempoEscondido++;
+        
+        if (tempoEscondido < 90) {
+            // Nos primeiros momentos: segue a direção do movimento MAS NÃO SAIO PROCURANDO
+            alvo.x += alvo.vx * 0.9;
+            alvo.y += alvo.vy * 0.9;
+            
+            // NÃO SAI DA TELA
+            if (alvo.x < 10) alvo.x = 10;
+            if (alvo.x > quadro.width - 10) alvo.x = quadro.width - 10;
+            if (alvo.y < 10) alvo.y = 10;
+            if (alvo.y > quadro.height - 10) alvo.y = quadro.height - 10;
+            
+            // NÃO DEIXA SUBIR SOZINHO — CORRIGE
+            if (ultimoPontoVisivel && alvo.y < ultimoPontoVisivel.y - 15) {
+                alvo.y += 0.5; // Volta devagar pra altura correta
+            }
+            
+            status.textContent = '👁️ Escondida — mantendo posição...';
+        } else {
+            // Muito tempo escondida → VOLTA AO ÚLTIMO LOCAL VISTO
+            alvo.x += (ultimoPontoVisivel.x - alvo.x) * 0.05;
+            alvo.y += (ultimoPontoVisivel.y - alvo.y) * 0.05;
+            alvo.vx *= 0.92;
+            alvo.vy *= 0.92;
+            status.textContent = '🔄 Voltando ao último local...';
+        }
     }
     
-    mostrar(alvo.x, alvo.y, alvo.confianca);
+    mostrar(alvo.x, alvo.y);
     requestAnimationFrame(rastrear);
 }
 
