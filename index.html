@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rastreador Exclusivo 💎</title>
+    <title>Rastreador Fiel 💎🔒</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -17,22 +17,22 @@
         
         .marcador {
             position: absolute;
-            width: 80px; height: 80px;
+            width: 85px; height: 85px;
             border: 4px solid #ffff00;
             border-radius: 50%;
-            box-shadow: 0 0 25px #ffff00, 0 0 40px #ffd00088;
+            box-shadow: 0 0 25px #ffff00, 0 0 45px #ffd000aa;
             pointer-events: none;
             display: none;
             z-index: 10;
-            transition: left 0.02s linear, top 0.02s linear;
-            animation: pulso 0.6s infinite alternate;
+            transition: left 0.015s linear, top 0.015s linear;
+            animation: pulso 0.5s infinite alternate;
         }
         
         .etiqueta {
             position: absolute;
             background: #ffff00;
             color: #000;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 14px;
@@ -40,7 +40,8 @@
             pointer-events: none;
             display: none;
             z-index: 11;
-            transition: left 0.02s linear, top 0.02s linear;
+            transition: left 0.015s linear, top 0.015s linear;
+            white-space: nowrap;
         }
         
         .botoes {
@@ -52,7 +53,7 @@
         }
         
         button {
-            padding: 13px 26px;
+            padding: 14px 28px;
             font-size: 17px;
             font-weight: bold;
             border: none;
@@ -70,15 +71,16 @@
             transform: translateX(-50%);
             background: rgba(0,0,0,0.75);
             color: #fff;
-            padding: 10px 18px;
+            padding: 10px 20px;
             border-radius: 30px;
             font-size: 13px;
             z-index: 20;
+            text-align: center;
         }
         
         @keyframes pulso {
             from { transform: scale(1); }
-            to { transform: scale(1.18); }
+            to { transform: scale(1.2); }
         }
     </style>
 </head>
@@ -86,12 +88,12 @@
     <video id="cam" autoplay playsinline></video>
     
     <div class="marcador" id="marcador"></div>
-    <div class="etiqueta" id="etiqueta">AQUI ESTÁ — MINHA PEDRINHA! 💎</div>
+    <div class="etiqueta" id="etiqueta">💎 MINHA PEDRINHA — SEMPRE A ELA!</div>
     
-    <div class="status" id="status">📷 Permita a câmera → clique NA SUA pedrinha!</div>
+    <div class="status" id="status">📷 Permita a câmera → clique em LOCALIZAR e depois NA SUA pedrinha!</div>
     
     <div class="botoes">
-        <button id="btnLocalizar">🎯 LOCALIZAR</button>
+        <button id="btnLocalizar">🎯 LOCALIZAR MINHA PEDRINHA</button>
         <button id="btnParar">🛑 PARAR</button>
     </div>
 
@@ -105,11 +107,12 @@ const status = document.getElementById('status');
 
 let rastreando = false;
 let alvo = null;
-let corReferencia = null; // A cor EXATA da pedrinha que VOCÊ marcou
+let corReferencia = null;
+let toleranciaCor = 35; // Mais rigoroso = menos confusão
 let ctx = null;
 let quadro = null;
 
-// Ligar câmera
+// Ligar câmera em alta velocidade
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
@@ -135,10 +138,10 @@ btnLocalizar.onclick = () => {
     rastreando = true;
     btnLocalizar.style.display = 'none';
     btnParar.style.display = 'block';
-    status.textContent = '👆 CLIQUE NA SUA PEDRINHA AGORA!';
+    status.textContent = '👆 CLIQUE EXATAMENTE NA SUA PEDRINHA AGORA!';
 };
 
-// === AQUI MARCA A PEDRINHA EXATA ===
+// === MARCA A PEDRINHA E PEGA SUA ASSINATURA EXATA ===
 cam.onclick = (e) => {
     if (!rastreando || !ctx) return;
     
@@ -148,28 +151,36 @@ cam.onclick = (e) => {
     
     const xTela = e.clientX - rect.left;
     const yTela = e.clientY - rect.top;
-    const xQuadro = xTela * escalaX;
-    const yQuadro = yTela * escalaY;
+    const xQ = xTela * escalaX;
+    const yQ = yTela * escalaY;
     
-    // Captura a COR EXATA da pedrinha que você clicou
+    // Captura a cor EXATA da pedrinha que VOCÊ escolheu
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
-    const dados = ctx.getImageData(xQuadro | 0, yQuadro | 0, 1, 1).data;
+    // Pega a cor de vários pontos ao redor pra ter média mais fiel
+    let somaR = 0, somaG = 0, somaB = 0, pontos = 0;
+    for (let dy = -3; dy <= 3; dy += 2) {
+        for (let dx = -3; dx <= 3; dx += 2) {
+            const d = ctx.getImageData((xQ + dx) | 0, (yQ + dy) | 0, 1, 1).data;
+            somaR += d[0]; somaG += d[1]; somaB += d[2]; pontos++;
+        }
+    }
     
     corReferencia = {
-        r: dados[0],
-        g: dados[1],
-        b: dados[2]
+        r: somaR / pontos,
+        g: somaG / pontos,
+        b: somaB / pontos
     };
     
     alvo = {
-        x: xQuadro,
-        y: yQuadro,
+        x: xQ,
+        y: yQ,
         vx: 0,
-        vy: 0
+        vy: 0,
+        confirmado: true
     };
     
-    cam.onclick = null; // Trava — não deixa trocar de pedrinha
-    status.textContent = '🔒 PEDRINHA MARCADA — OUTRAS SERÃO IGNORADAS!';
+    cam.onclick = null; // TRAVOU — só essa pedrinha agora!
+    status.textContent = '🔒 PEDRINHA MARCADA! SÓ ELA SERÁ RASTREADA — NENHUMA OUTRA!';
 };
 
 btnParar.onclick = () => {
@@ -178,7 +189,7 @@ btnParar.onclick = () => {
     etiqueta.style.display = 'none';
     btnLocalizar.style.display = 'block';
     btnParar.style.display = 'none';
-    status.textContent = '⏹️ Parado — clique de novo';
+    status.textContent = '⏹️ Parado — clique de novo pra marcar';
     alvo = null;
     corReferencia = null;
 };
@@ -191,25 +202,24 @@ function mostrar(x, y) {
     marcador.style.display = 'block';
     etiqueta.style.display = 'block';
     
-    marcador.style.left = (telaX - 40) + 'px';
-    marcador.style.top = (telaY - 40) + 'px';
+    marcador.style.left = (telaX - 42) + 'px';
+    marcador.style.top = (telaY - 42) + 'px';
     
-    etiqueta.style.left = (telaX - 60) + 'px';
-    etiqueta.style.top = (telaY - 105) + 'px';
+    etiqueta.style.left = (telaX - 80) + 'px';
+    etiqueta.style.top = (telaY - 115) + 'px';
 }
 
-// === COMPARA COR — SÓ ACEITA A QUE VOCÊ MARCOU ===
-function corIgual(r, g, b) {
+// === COMPARA COR — SÓ ACEITA A EXATA QUE VOCÊ MARCOU ===
+function ehAPedrinha(r, g, b) {
     if (!corReferencia) return false;
-    const tolerancia = 45; // Ajusta se precisar
-    return Math.abs(r - corReferencia.r) < tolerancia &&
-           Math.abs(g - corReferencia.g) < tolerancia &&
-           Math.abs(b - corReferencia.b) < tolerancia;
+    return Math.abs(r - corReferencia.r) < toleranciaCor &&
+           Math.abs(g - corReferencia.g) < toleranciaCor &&
+           Math.abs(b - corReferencia.b) < toleranciaCor;
 }
 
-// === RASTREAMENTO EXCLUSIVO ===
+// === O CÉREBRO — SEGUE ELA PRA QUALQUER LUGAR ===
 function rastrear() {
-    if (!rastreando || !alvo || !ctx || !corReferencia) {
+    if (!rastreando || !alvo || !corReferencia || !ctx) {
         requestAnimationFrame(rastrear);
         return;
     }
@@ -217,7 +227,10 @@ function rastrear() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    const raioBusca = 110;
+    // Área de busca: EXPANDIU conforme a velocidade — não deixa escapar
+    const velocidade = Math.hypot(alvo.vx, alvo.vy);
+    const raioBusca = Math.max(80, 120 + velocidade * 3);
+    
     let somaX = 0, somaY = 0, cont = 0;
     
     const minX = Math.max(0, alvo.x - raioBusca) | 0;
@@ -225,13 +238,13 @@ function rastrear() {
     const minY = Math.max(0, alvo.y - raioBusca) | 0;
     const maxY = Math.min(quadro.height, alvo.y + raioBusca) | 0;
     
-    // SÓ PROCURA A COR QUE VOCÊ MARCOU — outras vermelhas são IGNORADAS!
+    // SÓ PROCURA A PEDRINHA COM A COR EXATA — OUTRAS SÃO IGNORADAS COMPLETAMENTE
     for (let y = minY; y < maxY; y += 2) {
         for (let x = minX; x < maxX; x += 2) {
             const i = (y * quadro.width + x) * 4;
             const r = dados[i], g = dados[i+1], b = dados[i+2];
             
-            if (corIgual(r, g, b)) {
+            if (ehAPedrinha(r, g, b)) {
                 somaX += x;
                 somaY += y;
                 cont++;
@@ -239,19 +252,27 @@ function rastrear() {
         }
     }
     
-    if (cont >= 4) {
+    if (cont >= 3) {
+        // ENCONTROU A MINHA PEDRINHA! Atualiza posição RÁPIDO
         const novoX = somaX / cont;
         const novoY = somaY / cont;
         
-        alvo.vx = novoX - alvo.x;
-        alvo.vy = novoY - alvo.y;
+        // Calcula velocidade real pra saber pra onde ela vai
+        alvo.vx = (novoX - alvo.x) * 0.8;
+        alvo.vy = (novoY - alvo.y) * 0.8;
         
         alvo.x = novoX;
         alvo.y = novoY;
     } else {
-        // Perdeu de vista? Segue a direção e continua procurando ELA
-        alvo.x += alvo.vx * 1.5;
-        alvo.y += alvo.vy * 1.5;
+        // NÃO VIU MAS SABE PRA ONDE FOI → SEGUE A DIREÇÃO!
+        alvo.x += alvo.vx;
+        alvo.y += alvo.vy;
+        
+        // Se saiu da tela, reduz velocidade e continua procurando
+        if (alvo.x < 0 || alvo.x > quadro.width || alvo.y < 0 || alvo.y > quadro.height) {
+            alvo.vx *= 0.95;
+            alvo.vy *= 0.95;
+        }
     }
     
     mostrar(alvo.x, alvo.y);
