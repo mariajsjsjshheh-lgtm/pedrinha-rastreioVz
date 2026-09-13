@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SEGUE PARA SEMPRE 🔒</title>
+    <title>GRUDADA NO COPO — MESMA VELOCIDADE 🔒</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; touch-action: none; }
@@ -15,29 +15,28 @@
             object-fit: cover;
         }
 
-        /* GOTINHA + CADEADO — FIXA PRA SEMPRE */
         .marcador {
             position: absolute;
             width: 56px; height: 70px;
             pointer-events: none;
             z-index: 100;
             display: none;
-            transition: left 0.1s ease-out, top 0.1s ease-out;
-            filter: drop-shadow(0 0 12px rgba(0, 150, 136, 0.9));
+            transition: left 0.06s linear, top 0.06s linear;
+            filter: drop-shadow(0 0 14px rgba(0, 150, 136, 1));
         }
 
         .gotinha { width: 100%; height: 100%; }
 
         .cadeado {
             position: absolute;
-            bottom: -8px; left: 50%;
+            bottom: -6px; left: 50%;
             transform: translateX(-50%);
             background: #009688;
             color: white;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
         }
 
         .aviso {
@@ -79,24 +78,24 @@
             <path d="M26 0 C26 0 0 24 0 42 C0 54 11.7 64 26 64 C40.3 64 52 54 52 42 C52 24 26 0 26 0 Z" 
                   fill="#009688" />
         </svg>
-        <div class="cadeado">🔒 FIXADO</div>
+        <div class="cadeado">🔒 NO COPO</div>
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NO COPO PARA FIXAR — NÃO PARA MAIS
+        👆 TOQUE DIRETO NO COPO → VAI JUNTO PRA ONDE FOR
     </div>
 
-    <button class="botao" id="btnNovo">🔄 NOVO COPO</button>
+    <button class="botao" id="btnNovo">🔄 OUTRO COPO</button>
 
 <script>
 // ==============================================================
-// SÓ O QUE VOCÊ PEDIU — SEM INVENÇÃO, SEM BOTÃO DE PARAR
+// AGORA SIM: GRUDADA NO COPO, MESMA VELOCIDADE, NÃO FICA PARADA
 // ==============================================================
-// ✅ Toque no copo → FIXA COM CADEADO 🔒
-// ✅ Segue ele PARA SEMPRE — não para, não solta
-// ✅ Move o copo → vai junto. Para → para. Embaralha → continua nele
-// ✅ NÃO TEM botão de pausar/parar — só NOVO COPO pra trocar
-// ✅ Não some, não solta, não abandona
+// ✅ Mexe o copo → ela mexe NA MESMA HORA, MESMA VELOCIDADE
+// ✅ Para o copo → ela PARA JUNTO
+// ✅ Vai rápido → vai rápido. Devagar → devagar
+// ✅ Embaralha → segue O MESMO, não solta
+// ✅ Não fica parada no lugar antigo NUNCA
 // ==============================================================
 
 const cam = document.getElementById('cam');
@@ -107,20 +106,19 @@ const btnNovo = document.getElementById('btnNovo');
 let canvas, ctx;
 
 const alvo = {
-    fixado: false,
-    x: 0, y: 0,
-    cor: { r: 0, g: 0, b: 0, tol: 42 },
-    ultImgX: 0, ultImgY: 0,
-    raioBusca: 110,
+    preso: false,
+    cor: { r: 0, g: 0, b: 0, tol: 50 },
+    ultX: 0, ultY: 0,          // Última posição real do copo
+    ultImgX: 0, ultImgY: 0,    // Na imagem da câmera
+    raioBusca: 130,            // Procura perto de onde estava
+    fatorResposta: 0.35,       // Quanto MAIOR = MAIS RÁPIDO acompanha
     perdidos: 0,
-    maxPerdidos: 200,
-    suavX: 0, suavY: 0,
-    fatorSuav: 0.18
+    maxPerdidos: 300
 };
 
 // Liga câmera
 navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: 1280, height: 720 }
+    video: { facingMode: 'environment', width: 1280, height: 720, frameRate: 30 }
 }).then(fluxo => {
     cam.srcObject = fluxo;
     cam.onloadedmetadata = () => {
@@ -131,13 +129,13 @@ navigator.mediaDevices.getUserMedia({
     };
 }).catch(() => alert('Permita a câmera! 📷'));
 
-// Toque = fixa no copo
+// Toque = gruda no copo
 document.addEventListener('touchstart', fixar, { passive: false });
 document.addEventListener('mousedown', fixar);
 
 function fixar(e) {
     e.preventDefault();
-    if (!canvas || alvo.fixado) return;
+    if (!canvas || alvo.preso) return;
 
     let tx, ty;
     if (e.touches) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
@@ -147,66 +145,74 @@ function fixar(e) {
     const imgX = (tx / rect.width) * canvas.width;
     const imgY = (ty / rect.height) * canvas.height;
 
-    // Pega a cor do copo tocado
+    // Pega a cor EXATA do copo que tocou
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
     let r=0, g=0, b=0, qt=0;
-    for (let dy = -22; dy <= 22; dy += 2) {
-        for (let dx = -22; dx <= 22; dx += 2) {
+    for (let dy = -25; dy <= 25; dy += 1) {
+        for (let dx = -25; dx <= 25; dx += 1) {
             const px = Math.round(imgX + dx);
             const py = Math.round(imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
+            const dist = Math.hypot(dx, dy);
+            if (dist > 25) continue;
             const i = (py * canvas.width + px) * 4;
             r += imgData[i]; g += imgData[i+1]; b += imgData[i+2]; qt++;
         }
     }
 
-    alvo.cor.r = Math.round(r/qt);
-    alvo.cor.g = Math.round(g/qt);
-    alvo.cor.b = Math.round(b/qt);
+    alvo.cor.r = Math.round(r / qt);
+    alvo.cor.g = Math.round(g / qt);
+    alvo.cor.b = Math.round(b / qt);
 
-    alvo.x = tx; alvo.y = ty;
-    alvo.suavX = tx; alvo.suavY = ty;
-    alvo.ultImgX = imgX; alvo.ultImgY = imgY;
+    // Marca posição inicial
+    alvo.ultX = tx;
+    alvo.ultY = ty;
+    alvo.ultImgX = imgX;
+    alvo.ultImgY = imgY;
     alvo.perdidos = 0;
-    alvo.fixado = true;
+    alvo.preso = true;
 
+    // Mostra grudada
     marcador.style.display = 'block';
-    posicao(tx, ty);
-    aviso.textContent = '🔒 FIXADO PARA SEMPRE — Mova o copo!';
+    colocar(tx, ty);
+    aviso.textContent = '🔒 GRUDADA NO COPO — Mova ele que vai junto!';
     btnNovo.classList.remove('escondido');
 
-    seguir();
+    // Começa a seguir AGORA
+    acompanhar();
 }
 
-// Segue o copo o tempo todo
-function seguir() {
-    if (!alvo.fixado || !ctx) return;
+// ACOMPANHA O COPO SEM PARAR
+function acompanhar() {
+    if (!alvo.preso || !ctx) {
+        requestAnimationFrame(acompanhar);
+        return;
+    }
 
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    const escalaX = canvas.width / rect.width;
-    const escalaY = canvas.height / rect.height;
-
-    // Busca perto de onde estava — não sai procurando outro
+    // Busca AO REDOR de onde o copo ESTAVA — não procura no mundo todo
     const centroX = alvo.ultImgX;
     const centroY = alvo.ultImgY;
-    let somaX = 0, somaY = 0, qt = 0;
     const raio = alvo.raioBusca;
+    let somaX = 0, somaY = 0, qt = 0;
 
-    for (let dy = -raio; dy <= raio; dy += 2) {
-        for (let dx = -raio; dx <= raio; dx += 2) {
+    for (let dy = -raio; dy <= raio; dy += 1) {
+        for (let dx = -raio; dx <= raio; dx += 1) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
+
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > raio) continue;
 
             const i = (py * canvas.width + px) * 4;
             const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
 
+            // É a cor do NOSSO copo?
             const dr = Math.abs(r - alvo.cor.r);
             const dg = Math.abs(g - alvo.cor.g);
             const db = Math.abs(b - alvo.cor.b);
@@ -219,48 +225,51 @@ function seguir() {
         }
     }
 
-    if (qt >= 10) {
-        // Achou — atualiza
+    if (qt >= 8) {
+        // ✅ ACHOU — atualiza posição pro NOVO local do copo
         const novoImgX = somaX / qt;
         const novoImgY = somaY / qt;
+
+        // Converte pra tela
+        const novoX = (novoImgX / canvas.width) * rect.width;
+        const novoY = (novoImgY / canvas.height) * rect.height;
+
+        // Atualiza — resposta RÁPIDA, sem ficar no lugar antigo
+        alvo.ultX = alvo.ultX * (1 - alvo.fatorResposta) + novoX * alvo.fatorResposta;
+        alvo.ultY = alvo.ultY * (1 - alvo.fatorResposta) + novoY * alvo.fatorResposta;
+
+        // Atualiza posição de busca
         alvo.ultImgX = novoImgX;
         alvo.ultImgY = novoImgY;
         alvo.perdidos = 0;
 
-        const novoX = (novoImgX / canvas.width) * rect.width;
-        const novoY = (novoImgY / canvas.height) * rect.height;
+        // Coloca a gotinha — PONTA NO COPO
+        colocar(alvo.ultX, alvo.ultY);
 
-        // Suaviza
-        alvo.suavX = alvo.suavX * (1 - alvo.fatorSuav) + novoX * alvo.fatorSuav;
-        alvo.suavY = alvo.suavY * (1 - alvo.fatorSuav) + novoY * alvo.fatorSuav;
-
-        alvo.x = alvo.suavX;
-        alvo.y = alvo.suavY;
-        posicao(alvo.x, alvo.y);
     } else {
-        // Não achou agora — espera, não solta
+        // Não achou agora — NÃO FICA PARADA, continua procurando
         alvo.perdidos++;
-        if (alvo.perdidos < alvo.maxPerdidos) {
-            // Mantém onde estava, continua procurando
+        if (alvo.perdidos % 60 === 0 && alvo.raioBusca < 250) {
+            alvo.raioBusca += 20; // Alarga a busca aos poucos
         }
-        // Não some, não para
     }
 
-    requestAnimationFrame(seguir);
+    requestAnimationFrame(acompanhar);
 }
 
-// Coloca a ponta da gotinha no copo
-function posicao(px, py) {
+// Posição exata — ponta no copo
+function colocar(px, py) {
     marcador.style.left = (px - 28) + 'px';
     marcador.style.top = (py - 64) + 'px';
 }
 
 // Trocar de copo — só isso
 btnNovo.addEventListener('click', () => {
-    alvo.fixado = false;
+    alvo.preso = false;
+    alvo.raioBusca = 130;
     marcador.style.display = 'none';
     btnNovo.classList.add('escondido');
-    aviso.textContent = '👆 TOQUE NO NOVO COPO PARA FIXAR';
+    aviso.textContent = '👆 TOQUE NO NOVO COPO PARA GRUDAR';
 });
 </script>
 </body>
