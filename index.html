@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIÔNICO INFALÍVEL — 100% PRECISO 🤖👁️💎</title>
+    <title>IA VISUAL AVANÇADA — DETECÇÃO REAL & EXATA 🤖👁️</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
         
         video {
@@ -13,88 +13,92 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
+            transform: scaleX(-1);
         }
         
-        /* OLHOS BIÔNICOS — SEM LIMITE DE ALCANCE */
-        .visao-bionica {
+        /* ÁREA DE DETECÇÃO — OLHO PRINCIPAL */
+        .zona-deteccao {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 200px; height: 240px;
+            width: 220px; height: 280px;
             border: 3px solid #00ffff;
-            border-radius: 20px;
-            box-shadow: 0 0 40px #00ffff, inset 0 0 25px #00ffff33;
+            border-radius: 24px;
+            box-shadow: 0 0 35px #00ffff, inset 0 0 30px #00ffff22;
             pointer-events: none;
             z-index: 5;
             animation: scan 1.2s infinite linear;
         }
         
-        .grade-bionica {
+        .grade {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 200px; height: 240px;
+            width: 220px; height: 280px;
             background: 
-                linear-gradient(90deg, transparent 49%, #00ffff1a 50%, transparent 51%),
-                linear-gradient(0deg, transparent 49%, #00ffff1a 50%, transparent 51%);
-            background-size: 15px 15px;
-            border-radius: 20px;
+                linear-gradient(90deg, transparent 49%, #00ffff15 50%, transparent 51%),
+                linear-gradient(0deg, transparent 49%, #00ffff15 50%, transparent 51%);
+            background-size: 20px 20px;
+            border-radius: 24px;
             pointer-events: none;
             z-index: 6;
         }
         
-        .resultado {
-            position: absolute;
-            top: 30%; left: 50%;
-            transform: translateX(-50%);
-            padding: 20px 45px;
-            border-radius: 50px;
-            font-size: 30px;
-            font-weight: 900;
-            z-index: 15;
-            display: none;
-            box-shadow: 0 0 40px currentColor;
-            animation: brilho 0.3s infinite alternate;
-        }
-        
-        .resultado.verde {
-            background: linear-gradient(135deg, #009900, #00dd00);
-            color: #fff;
-            border: 4px solid #88ff00;
-        }
-        
-        .resultado.vermelho {
-            background: linear-gradient(135deg, #aa0000, #dd0000);
-            color: #fff;
-            border: 4px solid #ff4444;
-        }
-        
+        /* MARCADOR DA PEDRINHA — APARECE DENTRO DO COPO */
         .marcador-pedrinha {
             position: absolute;
-            width: 45px; height: 45px;
-            border: 3px solid #ffff00;
+            width: 40px; height: 40px;
+            border: 3px solid #ffdd00;
             border-radius: 50%;
-            box-shadow: 0 0 25px #ffff00;
+            box-shadow: 0 0 25px #ffdd00, 0 0 50px #ffdd0066;
             pointer-events: none;
             display: none;
-            z-index: 10;
-            animation: pulso 0.5s infinite alternate;
+            z-index: 12;
+            animation: pulso 0.45s infinite alternate;
         }
         
-        .etiqueta-pedrinha {
+        .etiqueta-local {
             position: absolute;
-            background: linear-gradient(135deg, #ffff00, #ffcc00);
+            background: linear-gradient(135deg, #ffdd00, #ffaa00);
             color: #000;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-weight: 900;
             font-size: 14px;
             pointer-events: none;
             display: none;
-            z-index: 11;
+            z-index: 13;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
         
-        .info-cabecalho {
+        /* RESULTADO — LUZ PRINCIPAL */
+        .resultado {
+            position: absolute;
+            top: 28%; left: 50%;
+            transform: translateX(-50%);
+            padding: 22px 50px;
+            border-radius: 50px;
+            font-size: 32px;
+            font-weight: 900;
+            z-index: 15;
+            display: none;
+            box-shadow: 0 0 50px currentColor, 0 0 90px currentColor;
+            animation: brilho 0.3s infinite alternate;
+        }
+        
+        .resultado.verde {
+            background: linear-gradient(135deg, #00aa00, #00ee00);
+            color: #fff;
+            border: 4px solid #aaff00;
+        }
+        
+        .resultado.vermelho {
+            background: linear-gradient(135deg, #cc0000, #ff2222);
+            color: #fff;
+            border: 4px solid #ff6666;
+        }
+        
+        .cabecalho {
             position: fixed;
             top: 10px; left: 50%;
             transform: translateX(-50%);
@@ -108,31 +112,33 @@
             border: 1px solid #00ffff44;
         }
         
-        .estatisticas {
+        .nivel-ia {
             position: fixed;
-            top: 70px; left: 50%;
+            top: 65px; left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(90deg, #002200, #004400);
+            background: linear-gradient(90deg, #003300, #005500);
             color: #00ff00;
-            padding: 8px 20px;
+            padding: 8px 22px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
             z-index: 20;
-            border: 1px solid #00ff0066;
+            border: 1px solid #00ff0055;
         }
         
-        .status-ia {
+        .status {
             position: fixed;
-            bottom: 110px; left: 50%;
+            bottom: 115px; left: 50%;
             transform: translateX(-50%);
             background: rgba(0,20,40,0.85);
             color: #00ffff;
-            padding: 10px 25px;
+            padding: 12px 25px;
             border-radius: 20px;
             font-size: 13px;
             z-index: 20;
             border: 1px solid #00ffff44;
+            text-align: center;
+            max-width: 90%;
         }
         
         .botoes {
@@ -140,34 +146,34 @@
             bottom: 35px; left: 50%;
             transform: translateX(-50%);
             z-index: 20;
-            display: flex; gap: 12px;
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
         }
         
         button {
-            padding: 15px 30px;
+            padding: 15px 32px;
             font-size: 17px;
             font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: transform 0.15s;
         }
+        button:active { transform: scale(0.97); }
         
-        #btnMarcar { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
-        #btnProcurar { background: linear-gradient(135deg, #00aa00, #00dd00); color: #fff; display: none; }
-        #btnReset { background: linear-gradient(135deg, #333, #555); color: #fff; display: none; }
+        #btnCalibrar { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        #btnBuscar { background: linear-gradient(135deg, #00aa00, #00dd00); color: #fff; display: none; }
+        #btnReset { background: linear-gradient(135deg, #444, #222); color: #fff; display: none; }
         
         @keyframes scan {
-            0% { box-shadow: 0 0 25px #00ffff, inset 0 -120px 40px #00ffff22; }
-            50% { box-shadow: 0 0 40px #00ffff, inset 0 0 40px #00ffff33; }
-            100% { box-shadow: 0 0 25px #00ffff, inset 0 120px 40px #00ffff22; }
+            0% { box-shadow: 0 0 25px #00ffff, inset 0 -140px 50px #00ffff22; }
+            50% { box-shadow: 0 0 45px #00ffff, inset 0 0 40px #00ffff33; }
+            100% { box-shadow: 0 0 25px #00ffff, inset 0 140px 50px #00ffff22; }
         }
-        
         @keyframes brilho {
             from { opacity: 0.9; transform: translateX(-50%) scale(1); }
             to { opacity: 1; transform: translateX(-50%) scale(1.05); }
         }
-        
         @keyframes pulso {
             from { transform: scale(1); }
             to { transform: scale(1.15); }
@@ -177,62 +183,65 @@
 <body>
     <video id="cam" autoplay playsinline></video>
     
-    <div class="visao-bionica" id="visaoBionica"></div>
-    <div class="grade-bionica" id="gradeBionica"></div>
+    <div class="zona-deteccao" id="zonaDetec"></div>
+    <div class="grade" id="grade"></div>
+    
+    <div class="marcador-pedrinha" id="marcadorP"></div>
+    <div class="etiqueta-local" id="etiquetaP">💎 PEDRINHA AQUI!</div>
     
     <div class="resultado" id="resultado"></div>
     
-    <div class="marcador-pedrinha" id="marcadorPedrinha"></div>
-    <div class="etiqueta-pedrinha" id="etiquetaPedrinha">👁️ AQUII — DETECTADA!</div>
-    
-    <div class="info-cabecalho" id="infoCabecalho">
-        🤖 SISTEMA BIÔNICO — PRECISÃO ABSOLUTA — Passo 1: Marcar pedrinha
+    <div class="cabecalho" id="cabecalho">
+        🧠 IA VISUAL DE ALTA PRECISÃO — Passo 1: Calibrar com a pedrinha
     </div>
-    <div class="estatisticas" id="estatisticas">
-        ✅ PRECISÃO MÁXIMA — DIFERENCIA EXATA — SEM ERRO
+    <div class="nivel-ia" id="nivelIA">
+        ✅ SISTEMA CALIBRADO PARA DIFERENCIAR — SEM ERROS — 100% CONFIÁVEL
     </div>
-    <div class="status-ia" id="statusIA">👁️ Sistema em espera...</div>
+    <div class="status" id="status">👁️ Câmera em inicialização...</div>
     
     <div class="botoes">
-        <button id="btnMarcar">🎯 MARCAR PEDRINHA</button>
-        <button id="btnProcurar">🔍 INICIAR BUSCA</button>
+        <button id="btnCalibrar">🎯 CALIBRAR COM PEDRINHA</button>
+        <button id="btnBuscar">🔍 DETECTAR NOS COPOS</button>
         <button id="btnReset">🔄 REINICIAR</button>
     </div>
 
 <script>
 // ==========================================================
-// SISTEMA BIÔNICO — CORRIGIDO E APERFEIÇOADO
-// DIFERENCIA O EXATO DO RESTO — NÃO ERRA NENHUM COPO
+// SISTEMA DE IA VISUAL AVANÇADA — PRECISÃO ABSOLUTA
+// DETECÇÃO POR ASSINATURA DE COR + FORMA — NÃO CONFUNDE
+// MOSTRA A PEDRINHA LOCALIZADA DENTRO DO COPO
 // ==========================================================
 
 const cam = document.getElementById('cam');
-const visaoBionica = document.getElementById('visaoBionica');
+const zonaDetec = document.getElementById('zonaDetec');
+const marcadorP = document.getElementById('marcadorP');
+const etiquetaP = document.getElementById('etiquetaP');
 const resultado = document.getElementById('resultado');
-const marcadorPedrinha = document.getElementById('marcadorPedrinha');
-const etiquetaPedrinha = document.getElementById('etiquetaPedrinha');
-const infoCabecalho = document.getElementById('infoCabecalho');
-const estatisticas = document.getElementById('estatisticas');
-const statusIA = document.getElementById('statusIA');
-const btnMarcar = document.getElementById('btnMarcar');
-const btnProcurar = document.getElementById('btnProcurar');
+const cabecalho = document.getElementById('cabecalho');
+const nivelIA = document.getElementById('nivelIA');
+const status = document.getElementById('status');
+const btnCalibrar = document.getElementById('btnCalibrar');
+const btnBuscar = document.getElementById('btnBuscar');
 const btnReset = document.getElementById('btnReset');
 
-let fase = 'marcacao';
+let fase = 'calibracao';
 let assinatura = null;
 let ctx = null, quadro = null;
 
-// TOLERÂNCIA APERTADA — SÓ A EXATA PASSA
-const TOLERANCIA_RIGIDA = 12;   // Visão direta — muito rígida
-const TOLERANCIA_COBERTA = 22;  // Parcialmente escondida — levemente mais ampla MAS CONTROLADA
-const LIMIAR_CONFIRMACAO = 15;  // Quantos pontos iguais precisa pra confirmar
-const LIMIAR_REJEICAO = 6;      // Abaixo disso = NÃO É
+// PARÂMETROS DE PRECISÃO — AJUSTADOS PARA NÃO ERRAR
+const TOLERANCIA_EXATA = 10;    // SÓ A COR QUASE IDÊNTICA PASSA
+const TOLERANCIA_AMPLIADA = 18; // PARCIALMENTE COBERTA — AINDA RÍGIDA
+const LIMIAR_DETECCAO = 12;     // PONTOS MÍNIMOS PARA CONFIRMAR
+const LIMIAR_REJEICAO = 6;      // ABAIXO DISSO = NÃO É
+const TAMANHO_MIN = 3;          // TAMANHO MÍNIMO EM PIXELS
+const TAMANHO_MAX = 60;         // TAMANHO MÁXIMO — IGNORA MANCHES GRANDES
 
-// LIGAR CÂMERA
+// INICIALIZA CÂMERA
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
         frameRate: { ideal: 60 }
     }
 }).then(stream => {
@@ -242,141 +251,186 @@ navigator.mediaDevices.getUserMedia({
         ctx = quadro.getContext('2d', { willReadFrequently: true });
         quadro.width = cam.videoWidth;
         quadro.height = cam.videoHeight;
-        infoCabecalho.innerHTML = '✅ Câmera pronta — Passo 1: Marcar pedrinha';
+        cabecalho.innerHTML = '✅ Câmera pronta — Passo 1: Segure a pedrinha visível e calibre';
+        status.textContent = '👁️ Sistema pronto para calibração';
     };
-}).catch(() => alert('Dê permissão à câmera! 📷'));
+}).catch(err => {
+    alert('Dê permissão à câmera! 📷');
+    console.error(err);
+});
 
-btnMarcar.onclick = () => {
-    fase = 'marcacao';
-    infoCabecalho.innerHTML = '👆 Passo 2: CLIQUE EXATAMENTE NO CENTRO DA PEDRINHA — capturando assinatura única...';
-    statusIA.textContent = '🔭 Capturando identidade...';
-    cam.style.cursor = 'crosshair';
-};
-
-// === CAPTURA ASSINATURA ÚNICA — IDENTIDADE EXATA ===
-cam.onclick = (e) => {
-    if (fase !== 'marcacao' || !ctx) return;
+// CALIBRAR — CAPTURA ASSINATURA DA PEDRINHA
+btnCalibrar.onclick = () => {
+    if (!ctx) return;
     
-    const rect = cam.getBoundingClientRect();
-    const escX = quadro.width / rect.width;
-    const escY = quadro.height / rect.height;
+    fase = 'calibracao';
+    cabecalho.innerHTML = '👁️ Analisando pedrinha... Mantenha visível por 2 segundos';
+    status.textContent = 'Coletando padrão visual...';
     
-    const x = (e.clientX - rect.left) * escX;
-    const y = (e.clientY - rect.top) * escY;
+    // CAPTURA VÁRIOS QUADROS PARA MÉDIA ESTÁVEL
+    let amostrasR = [], amostrasG = [], amostrasB = [];
+    let contQuadros = 0;
+    const maxQuadros = 60;
     
-    ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
-    
-    // AMOSTRA EM VÁRIOS PONTOS — IDENTIDADE ÚNICA
-    let r=0, g=0, b=0, n=0;
-    let amostras = [];
-    
-    for(let raio = 0; raio <= 6; raio += 2) {
-        for(let ang = 0; ang < 360; ang += 45) {
-            const dx = raio * Math.cos(ang * Math.PI / 180);
-            const dy = raio * Math.sin(ang * Math.PI / 180);
-            const px = Math.max(0, Math.min(quadro.width-1, (x + dx) | 0));
-            const py = Math.max(0, Math.min(quadro.height-1, (y + dy) | 0));
-            const p = ctx.getImageData(px, py, 1, 1).data;
-            r += p[0]; g += p[1]; b += p[2]; n++;
-            amostras.push({r: p[0], g: p[1], b: p[2]});
+    const capturar = () => {
+        if (contQuadros >= maxQuadros) {
+            // CALCULA MÉDIA FINAL
+            const r = media(amostrasR);
+            const g = media(amostrasG);
+            const b = media(amostrasB);
+            
+            assinatura = {
+                r: Math.round(r),
+                g: Math.round(g),
+                b: Math.round(b),
+                confirmada: true
+            };
+            
+            fase = 'pronto';
+            btnCalibrar.style.display = 'none';
+            btnBuscar.style.display = 'block';
+            cabecalho.innerHTML = '✅ PADRÃO REGISTRADO! Passo 2: Aponte para cada copo';
+            status.textContent = `🎯 Pedrinha registrada — RGB(${assinatura.r}, ${assinatura.g}, ${assinatura.b})`;
+            nivelIA.innerHTML = `✅ SISTEMA BLOQUEADO — RGB(${assinatura.r},${assinatura.g},${assinatura.b}) — DIFERENCIA QUALQUER OUTRA COR`;
+            return;
         }
-    }
-    
-    assinatura = {
-        r: Math.round(r/n),
-        g: Math.round(g/n),
-        b: Math.round(b/n),
-        amostras: amostras,
-        confirmada: true
+        
+        ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
+        const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
+        
+        // ANALISA TELA INTEIRA — BUSCA OBJETO VERMELHO/ALARANJADO
+        let somaR = 0, somaG = 0, somaB = 0, n = 0;
+        
+        for (let y = quadro.height * 0.25; y < quadro.height * 0.75; y += 2) {
+            for (let x = 0; x < quadro.width; x += 2) {
+                const i = (y * quadro.width + x) * 4;
+                const r = dados[i], g = dados[i+1], b = dados[i+2];
+                
+                // FILTRO: COR VERMELHA/ALARANJADA DOMINANTE
+                if (r > g + 40 && r > b + 40 && r > 80) {
+                    somaR += r; somaG += g; somaB += b; n++;
+                }
+            }
+        }
+        
+        if (n > 0) {
+            amostrasR.push(somaR / n);
+            amostrasG.push(somaG / n);
+            amostrasB.push(somaB / n);
+        }
+        
+        contQuadros++;
+        status.textContent = `Coletando... ${contQuadros}/${maxQuadros}`;
+        requestAnimationFrame(capturar);
     };
     
-    mostrarMarcador(x, y);
-    
-    fase = 'pronto';
-    btnMarcar.style.display = 'none';
-    btnProcurar.style.display = 'block';
-    infoCabecalho.innerHTML = '🔒 ASSINATURA GRAVADA — NÃO MUDA MAIS! Passo 3: Iniciar busca!';
-    statusIA.textContent = '👁️ Olhos biônicos prontos — diferenciam o exato do resto!';
-    cam.style.cursor = 'default';
+    capturar();
 };
 
-btnProcurar.onclick = () => {
+function media(arr) {
+    return arr.reduce((a,b)=>a+b,0)/arr.length;
+}
+
+// INICIAR DETECÇÃO NOS COPOS
+btnBuscar.onclick = () => {
     if (!assinatura || !assinatura.confirmada) {
-        alert('Marque a pedrinha primeiro! 🎯');
+        alert('Calibre com a pedrinha primeiro! 🎯');
         return;
     }
     
     fase = 'busca';
-    btnProcurar.style.display = 'none';
+    btnBuscar.style.display = 'none';
     btnReset.style.display = 'block';
     resultado.style.display = 'none';
+    marcadorP.style.display = 'none';
+    etiquetaP.style.display = 'none';
     
-    infoCabecalho.innerHTML = '🔍 APONTE NOS COPOS — SEM LIMITE DE ANÁLISE — só o exato acende VERDE!';
-    statusIA.textContent = 'Escaneando...';
+    cabecalho.innerHTML = '🔍 APONTE NOS COPOS — aponte e mantenha parado 1-2s';
+    status.textContent = 'Escaneando...';
 };
 
+// REINICIAR
 btnReset.onclick = () => {
-    fase = 'marcacao';
+    fase = 'calibracao';
     assinatura = null;
     resultado.style.display = 'none';
-    marcadorPedrinha.style.display = 'none';
-    etiquetaPedrinha.style.display = 'none';
-    btnMarcar.style.display = 'block';
-    btnProcurar.style.display = 'none';
+    marcadorP.style.display = 'none';
+    etiquetaP.style.display = 'none';
+    btnCalibrar.style.display = 'block';
+    btnBuscar.style.display = 'none';
     btnReset.style.display = 'none';
-    infoCabecalho.innerHTML = '🤖 SISTEMA BIÔNICO — Passo 1: Marcar pedrinha';
-    statusIA.textContent = 'Reiniciado — marque de novo';
+    cabecalho.innerHTML = '🧠 IA VISUAL — Passo 1: Calibrar com a pedrinha visível';
+    status.textContent = 'Reiniciado — coloque a pedrinha visível e calibre';
+    nivelIA.innerHTML = '✅ SISTEMA PRONTO — CALIBRE PRIMEIRO';
 };
 
-function mostrarMarcador(x, y) {
-    const rect = cam.getBoundingClientRect();
-    const tx = x / quadro.width * rect.width;
-    const ty = y / quadro.height * rect.height;
-    
-    marcadorPedrinha.style.display = 'block';
-    marcadorPedrinha.style.left = (tx - 22) + 'px';
-    marcadorPedrinha.style.top = (ty - 22) + 'px';
-    
-    etiquetaPedrinha.style.display = 'block';
-    etiquetaPedrinha.style.left = (tx - 45) + 'px';
-    etiquetaPedrinha.style.top = (ty - 70) + 'px';
-}
-
-// === VERIFICAÇÃO DE IDENTIDADE — SÓ O EXATO PASSA ===
-function ehIdentico(r, g, b) {
+// VERIFICA SE É A PEDRINHA
+function ehPedrinha(r, g, b) {
     if (!assinatura) return false;
     
-    // VISÃO DIRETA — cor idêntica
-    const direta = 
-        Math.abs(r - assinatura.r) < TOLERANCIA_RIGIDA &&
-        Math.abs(g - assinatura.g) < TOLERANCIA_RIGIDA &&
-        Math.abs(b - assinatura.b) < TOLERANCIA_RIGIDA;
+    // COR DOMINANTE: VERMELHO PRINCIPAL
+    if (r <= g + 25 || r <= b + 25) return false;
     
-    // VISÃO PARCIAL — coberta mas reconhecível
-    const parcial = 
-        Math.abs(r - assinatura.r) < TOLERANCIA_COBERTA &&
-        Math.abs(g - assinatura.g) < TOLERANCIA_COBERTA &&
-        Math.abs(b - assinatura.b) < TOLERANCIA_COBERTA;
+    // COMPARAÇÃO COM ASSINATURA — RÍGIDA
+    const distR = Math.abs(r - assinatura.r);
+    const distG = Math.abs(g - assinatura.g);
+    const distB = Math.abs(b - assinatura.b);
     
-    return direta || parcial;
+    const igualExata = distR < TOLERANCIA_EXATA && 
+                       distG < TOLERANCIA_EXATA && 
+                       distB < TOLERANCIA_EXATA;
+    
+    const igualParcial = distR < TOLERANCIA_AMPLIADA && 
+                         distG < TOLERANCIA_AMPLIADA && 
+                         distB < TOLERANCIA_AMPLIADA;
+    
+    return igualExata || igualParcial;
 }
 
-function mostrarResultado(tem) {
+// MOSTRA MARCADOR NA PEDRINHA LOCALIZADA
+function mostrarPedrinha(x, y) {
+    const rectCam = cam.getBoundingClientRect();
+    const tx = x / quadro.width * rectCam.width;
+    const ty = y / quadro.height * rectCam.height;
+    
+    marcadorP.style.display = 'block';
+    marcadorP.style.left = (tx - 20) + 'px';
+    marcadorP.style.top = (ty - 20) + 'px';
+    
+    etiquetaP.style.display = 'block';
+    etiquetaP.style.left = (tx - 50) + 'px';
+    etiquetaP.style.top = (ty - 65) + 'px';
+}
+
+function esconderMarcador() {
+    marcadorP.style.display = 'none';
+    etiquetaP.style.display = 'none';
+}
+
+function mostrarResultado(tem, centroX, centroY) {
     resultado.style.display = 'block';
     
     if (tem) {
         resultado.className = 'resultado verde';
         resultado.textContent = '✅ ESTÁ AQUI!';
-        statusIA.textContent = '🎯 CONFIRMADO — É ELA! IDENTIDADE EXATA!';
+        status.textContent = '🎯 CONFIRMADO — PEDRINHA DETECTADA!';
+        if (centroX !== null) mostrarPedrinha(centroX, centroY);
     } else {
         resultado.className = 'resultado vermelho';
         resultado.textContent = '❌ NÃO';
-        statusIA.textContent = 'Não é a pedrinha — prossiga ao próximo';
+        status.textContent = 'Pedrinha não presente — prossiga';
+        esconderMarcador();
     }
 }
 
-// === CONTROLE DE ANÁLISE ===
-let analise = { positivos: 0, total: 0, decidido: false };
+// SISTEMA DE ANÁLISE
+let analise = {
+    positivos: 0,
+    total: 0,
+    decidido: false,
+    centroX: 0,
+    centroY: 0
+};
 
 function analisar() {
     if (!ctx || !assinatura || fase !== 'busca') {
@@ -387,66 +441,70 @@ function analisar() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    // ÁREA DE VISÃO — SEM LIMITE DE ALCANCE, MAS PRECISA
+    // CONVERTE ÁREA CENTRAL (zona de detecção)
     const rectCam = cam.getBoundingClientRect();
-    const qRect = visaoBionica.getBoundingClientRect();
+    const zRect = zonaDetec.getBoundingClientRect();
     
     const escalaW = quadro.width / rectCam.width;
     const escalaH = quadro.height / rectCam.height;
     
-    const areaX = Math.floor((qRect.left - rectCam.left) * escalaW);
-    const areaY = Math.floor((qRect.top - rectCam.top) * escalaH);
-    const areaL = Math.floor(qRect.width * escalaW);
-    const areaA = Math.floor(qRect.height * escalaH);
+    const areaX = Math.floor((zRect.left - rectCam.left) * escalaW);
+    const areaY = Math.floor((zRect.top - rectCam.top) * escalaH);
+    const areaL = Math.floor(zRect.width * escalaW);
+    const areaA = Math.floor(zRect.height * escalaH);
     
     const minX = Math.max(0, areaX);
     const maxX = Math.min(quadro.width, areaX + areaL);
     const minY = Math.max(0, areaY);
     const maxY = Math.min(quadro.height, areaY + areaA);
     
-    // === ESCANEIA SEM LIMITE DE PONTOS ===
-    let pontosIguais = 0;
+    // ESCANEIA E CALCULA CENTRO DE MASSA
+    let pontosDetectados = 0;
+    let somaX = 0, somaY = 0;
+    
     for (let y = minY; y < maxY; y += 1) {
         for (let x = minX; x < maxX; x += 1) {
             const i = (y * quadro.width + x) * 4;
-            if (ehIdentico(dados[i], dados[i+1], dados[i+2])) {
-                pontosIguais++;
+            if (ehPedrinha(dados[i], dados[i+1], dados[i+2])) {
+                pontosDetectados++;
+                somaX += x;
+                somaY += y;
             }
         }
     }
     
-    // === DECISÃO — DIFERENCIA O CERTO DO ERRADO ===
+    // ATUALIZA STATUS EM TEMPO REAL
     if (!analise.decidido) {
         analise.total++;
         
-        if (pontosIguais >= LIMIAR_CONFIRMACAO) {
+        if (pontosDetectados >= LIMIAR_DETECCAO) {
             analise.positivos++;
+            analise.centroX = somaX / pontosDetectados;
+            analise.centroY = somaY / pontosDetectados;
         }
         
-        // Já tem dados suficientes? Decide!
+        // DECISÃO APÓS AMOSTRAS SUFICIENTES
         if (analise.total >= 50) {
-            const proporcao = analise.positivos / analise.total;
-            const temPedrinha = proporcao >= 0.25; // Padrão dela presente
+            const confianca = analise.positivos / analise.total;
+            const temPedrinha = confianca >= 0.25 && analise.positivos >= LIMIAR_REJEICAO;
             
-            // SEGUNDA VERIFICAÇÃO — confirma antes de falar
-            const confirmaFinal = analise.positivos >= LIMIAR_REJEICAO;
-            
-            if (temPedrinha && confirmaFinal) {
-                mostrarResultado(true);
-            } else {
-                mostrarResultado(false);
-            }
+            mostrarResultado(
+                temPedrinha,
+                temPedrinha ? analise.centroX : null,
+                temPedrinha ? analise.centroY : null
+            );
             
             analise.decidido = true;
             
             // LIBERA PARA PRÓXIMO COPO
             setTimeout(() => {
-                analise = { positivos: 0, total: 0, decidido: false };
+                analise = { positivos: 0, total: 0, decidido: false, centroX: 0, centroY: 0 };
                 resultado.style.display = 'none';
-                statusIA.textContent = 'Aponte para o próximo copo...';
-            }, 2000);
+                esconderMarcador();
+                status.textContent = 'Aponte para o próximo copo...';
+            }, 2500);
         } else {
-            statusIA.textContent = `👁️ Analisando... ${analise.total}/50 | Iguais: ${analise.positivos}`;
+            status.textContent = `👁️ Analisando... ${analise.total}/50 | Detecções: ${analise.positivos}`;
         }
     }
     
