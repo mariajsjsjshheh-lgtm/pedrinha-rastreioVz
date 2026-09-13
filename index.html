@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>IA FIRME — SÓ MEXE QUANDO O COPO MEXE 🎯</title>
+    <title>SEGUE PARA SEMPRE 🔒</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; touch-action: none; }
 
         video {
@@ -15,182 +15,112 @@
             object-fit: cover;
         }
 
-        /* GOTINHA FIRME — NÃO TREME, NÃO VAI SOZINHA */
-        .marcador-alvo {
+        /* GOTINHA + CADEADO — FIXA PRA SEMPRE */
+        .marcador {
             position: absolute;
             width: 56px; height: 70px;
             pointer-events: none;
             z-index: 100;
             display: none;
-            transition: left 0.12s ease-out, top 0.12s ease-out;
-            filter: drop-shadow(0 0 10px rgba(0, 150, 136, 0.8));
+            transition: left 0.1s ease-out, top 0.1s ease-out;
+            filter: drop-shadow(0 0 12px rgba(0, 150, 136, 0.9));
         }
 
-        .gotinha-svg { width: 100%; height: 100%; }
+        .gotinha { width: 100%; height: 100%; }
 
-        .anel-pulso {
+        .cadeado {
             position: absolute;
-            top: 50%; left: 50%;
-            width: 70px; height: 84px;
-            transform: translate(-50%, -50%);
-            border: 2px solid rgba(0, 150, 136, 0.5);
-            border-radius: 50% / 40%;
-            animation: expandir 2s ease-out infinite;
-        }
-
-        .etiqueta {
-            position: absolute;
-            top: -28px; left: 50%;
+            bottom: -8px; left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #009688, #00bfa5);
+            background: #009688;
             color: white;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 900;
-            white-space: nowrap;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
         }
 
-        @keyframes expandir {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
-        }
-
-        .cabecalho {
+        .aviso {
             position: fixed;
-            top: 12px; left: 50%;
+            top: 15px; left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.85);
             color: white;
-            padding: 12px 25px;
+            padding: 12px 20px;
             border-radius: 30px;
-            font-size: 13px;
+            font-size: 14px;
             z-index: 200;
-            text-align: center;
             border: 2px solid #009688;
-            max-width: 94%;
         }
 
-        .dados {
-            position: fixed;
-            top: 72px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,20,20,0.85);
-            color: #80ffea;
-            padding: 10px 18px;
-            border-radius: 20px;
-            font-size: 11px;
-            z-index: 200;
-            border: 1px solid rgba(0, 150, 136, 0.3);
-        }
-
-        .botoes {
+        .botao {
             position: fixed;
             bottom: 30px; left: 50%;
             transform: translateX(-50%);
-            z-index: 200;
-            display: flex; gap: 15px;
-        }
-
-        button {
-            padding: 15px 32px;
-            font-size: 15px;
-            font-weight: 900;
+            background: #009688;
+            color: white;
             border: none;
+            padding: 15px 35px;
+            font-size: 16px;
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            z-index: 200;
         }
-        button:active { transform: scale(0.96); }
-
-        #btnMarcar {
-            background: linear-gradient(135deg, #009688, #00bfa5);
-            color: white;
-        }
-        #btnNovo {
-            background: linear-gradient(135deg, #ff9800, #ffb300);
-            color: #000;
-            display: none;
-        }
+        .botao:active { transform: scale(0.96); }
+        .botao.escondido { display: none; }
     </style>
 </head>
 <body>
     <video id="cam" autoplay playsinline muted></video>
 
-    <div class="marcador-alvo" id="marcador">
-        <svg class="gotinha-svg" viewBox="0 0 52 64">
+    <div class="marcador" id="marcador">
+        <svg class="gotinha" viewBox="0 0 52 64">
             <path d="M26 0 C26 0 0 24 0 42 C0 54 11.7 64 26 64 C40.3 64 52 54 52 42 C52 24 26 0 26 0 Z" 
                   fill="#009688" />
         </svg>
-        <div class="anel-pulso"></div>
-        <div class="etiqueta" id="etiqueta">🎯 COPO MARCADO</div>
+        <div class="cadeado">🔒 FIXADO</div>
     </div>
 
-    <div class="cabecalho" id="cabecalho">
-        👆 TOQUE NO COPO → FICA FIRME, SÓ MEXE QUANDO ELE MEXE!
+    <div class="aviso" id="aviso">
+        👆 TOQUE NO COPO PARA FIXAR — NÃO PARA MAIS
     </div>
 
-    <div class="dados" id="dados">
-        Aguardando...
-    </div>
-
-    <div class="botoes">
-        <button id="btnMarcar">🎯 MARCAR COPO</button>
-        <button id="btnNovo">🔄 TROCAR DE COPO</button>
-    </div>
+    <button class="botao" id="btnNovo">🔄 NOVO COPO</button>
 
 <script>
-// =================================================================
-// VERSÃO CALMA E FIRME — NÃO MEXE SOZINHA!
-// =================================================================
-// ✅ Fica PARADA quando o copo para
-// ✅ SEGUE junto quando o copo mexe
-// ✅ EMBARALHANDO? Continua no MESMO copo
-// ✅ NÃO TREME, NÃO VAI SOZINHA — firme no alvo
-// =================================================================
+// ==============================================================
+// SÓ O QUE VOCÊ PEDIU — SEM INVENÇÃO, SEM BOTÃO DE PARAR
+// ==============================================================
+// ✅ Toque no copo → FIXA COM CADEADO 🔒
+// ✅ Segue ele PARA SEMPRE — não para, não solta
+// ✅ Move o copo → vai junto. Para → para. Embaralha → continua nele
+// ✅ NÃO TEM botão de pausar/parar — só NOVO COPO pra trocar
+// ✅ Não some, não solta, não abandona
+// ==============================================================
 
 const cam = document.getElementById('cam');
 const marcador = document.getElementById('marcador');
-const etiqueta = document.getElementById('etiqueta');
-const cabecalho = document.getElementById('cabecalho');
-const dados = document.getElementById('dados');
-const btnMarcar = document.getElementById('btnMarcar');
+const aviso = document.getElementById('aviso');
 const btnNovo = document.getElementById('btnNovo');
 
 let canvas, ctx;
 
-// === DADOS DO COPO MARCADO ===
-const copo = {
-    ativo: false,
-    
-    // Posição na tela
+const alvo = {
+    fixado: false,
     x: 0, y: 0,
-    xAnterior: 0, yAnterior: 0,
-    
-    // Cor que identifica ESTE copo
-    cor: { r: 0, g: 0, b: 0, tolerancia: 40 },
-    
-    // Área de busca — NÃO sai procurando longe à toa
-    buscaX: 0, buscaY: 0,
-    raioBusca: 100, // Só procura perto de onde estava
-    
-    // Controle de movimento
-    parado: true,
-    limiarMovimento: 5, // Menor que isso = considera parado
-    
-    // Persistência — não some
-    quadrosPerdidos: 0,
-    maxPerdidos: 120, // Continua buscando muito tempo
-    
-    // Suavização FIRME — sem loucura
+    cor: { r: 0, g: 0, b: 0, tol: 42 },
+    ultImgX: 0, ultImgY: 0,
+    raioBusca: 110,
+    perdidos: 0,
+    maxPerdidos: 200,
     suavX: 0, suavY: 0,
-    fatorResposta: 0.15 // Mais devagar e firme = menos tremida
+    fatorSuav: 0.18
 };
 
-// === INICIAR CÂMERA ===
+// Liga câmera
 navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    video: { facingMode: 'environment', width: 1280, height: 720 }
 }).then(fluxo => {
     cam.srcObject = fluxo;
     cam.onloadedmetadata = () => {
@@ -198,33 +128,32 @@ navigator.mediaDevices.getUserMedia({
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
-        cabecalho.innerHTML = '✅ Câmera pronta — Toque no copo para marcar!';
     };
 }).catch(() => alert('Permita a câmera! 📷'));
 
-// === MARCAR O COPO ===
-function marcar(e) {
-    e.preventDefault();
-    if (!canvas) return;
+// Toque = fixa no copo
+document.addEventListener('touchstart', fixar, { passive: false });
+document.addEventListener('mousedown', fixar);
 
-    // Pega onde tocou
+function fixar(e) {
+    e.preventDefault();
+    if (!canvas || alvo.fixado) return;
+
     let tx, ty;
     if (e.touches) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }
     else { tx = e.clientX; ty = e.clientY; }
 
     const rect = cam.getBoundingClientRect();
-    
-    // Converte para coordenada da imagem
     const imgX = (tx / rect.width) * canvas.width;
     const imgY = (ty / rect.height) * canvas.height;
 
-    // Pegar a COR do copo tocado
+    // Pega a cor do copo tocado
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
     let r=0, g=0, b=0, qt=0;
-    for (let dy = -20; dy <= 20; dy += 2) {
-        for (let dx = -20; dx <= 20; dx += 2) {
+    for (let dy = -22; dy <= 22; dy += 2) {
+        for (let dx = -22; dx <= 22; dx += 2) {
             const px = Math.round(imgX + dx);
             const py = Math.round(imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
@@ -233,73 +162,56 @@ function marcar(e) {
         }
     }
 
-    // Salva identidade do copo
-    copo.cor.r = Math.round(r/qt);
-    copo.cor.g = Math.round(g/qt);
-    copo.cor.b = Math.round(b/qt);
+    alvo.cor.r = Math.round(r/qt);
+    alvo.cor.g = Math.round(g/qt);
+    alvo.cor.b = Math.round(b/qt);
 
-    // Posição inicial
-    copo.x = tx; copo.y = ty;
-    copo.suavX = tx; copo.suavY = ty;
-    copo.xAnterior = tx; copo.yAnterior = ty;
-    copo.buscaX = imgX; copo.buscaY = imgY;
-    copo.quadrosPerdidos = 0;
-    copo.ativo = true;
-    copo.parado = true;
+    alvo.x = tx; alvo.y = ty;
+    alvo.suavX = tx; alvo.suavY = ty;
+    alvo.ultImgX = imgX; alvo.ultImgY = imgY;
+    alvo.perdidos = 0;
+    alvo.fixado = true;
 
-    // Mostra gotinha
     marcador.style.display = 'block';
-    posicionar(tx, ty);
+    posicao(tx, ty);
+    aviso.textContent = '🔒 FIXADO PARA SEMPRE — Mova o copo!';
+    btnNovo.classList.remove('escondido');
 
-    cabecalho.innerHTML = '✅ MARCADO! Mova o copo devagar — ela segue!';
-    dados.innerHTML = 'Status: FIRME';
-
-    btnMarcar.style.display = 'none';
-    btnNovo.style.display = 'block';
-
-    // Começa a vigiar
-    vigiar();
+    seguir();
 }
 
-// === VIGIAR O COPO — SÓ MEXE QUANDO ELE MEXE ===
-function vigiar() {
-    if (!copo.ativo || !ctx) return;
+// Segue o copo o tempo todo
+function seguir() {
+    if (!alvo.fixado || !ctx) return;
 
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // Proporção entre imagem e tela
     const escalaX = canvas.width / rect.width;
     const escalaY = canvas.height / rect.height;
 
-    // Ponto de busca: ONDE ESTAVA O COPO + pequena margem
-    const centroX = copo.buscaX;
-    const centroY = copo.buscaY;
-    const raio = copo.raioBusca;
-
-    // Buscar APENAS perto de onde o copo estava — NÃO procura no mundo todo!
+    // Busca perto de onde estava — não sai procurando outro
+    const centroX = alvo.ultImgX;
+    const centroY = alvo.ultImgY;
     let somaX = 0, somaY = 0, qt = 0;
+    const raio = alvo.raioBusca;
 
     for (let dy = -raio; dy <= raio; dy += 2) {
         for (let dx = -raio; dx <= raio; dx += 2) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
-
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-
-            // Fora do círculo de busca = ignora
             if (Math.hypot(dx, dy) > raio) continue;
 
             const i = (py * canvas.width + px) * 4;
             const r = imgData[i], g = imgData[i+1], b = imgData[i+2];
 
-            // É a COR do copo que marcamos?
-            const dr = Math.abs(r - copo.cor.r);
-            const dg = Math.abs(g - copo.cor.g);
-            const db = Math.abs(b - copo.cor.b);
+            const dr = Math.abs(r - alvo.cor.r);
+            const dg = Math.abs(g - alvo.cor.g);
+            const db = Math.abs(b - alvo.cor.b);
 
-            if (dr < copo.cor.tolerancia && dg < copo.cor.tolerancia && db < copo.cor.tolerancia) {
+            if (dr < alvo.cor.tol && dg < alvo.cor.tol && db < alvo.cor.tol) {
                 somaX += px;
                 somaY += py;
                 qt++;
@@ -307,93 +219,49 @@ function vigiar() {
         }
     }
 
-    let encontrado = false;
-    let novoXImg = copo.buscaX;
-    let novoYImg = copo.buscaY;
+    if (qt >= 10) {
+        // Achou — atualiza
+        const novoImgX = somaX / qt;
+        const novoImgY = somaY / qt;
+        alvo.ultImgX = novoImgX;
+        alvo.ultImgY = novoImgY;
+        alvo.perdidos = 0;
 
-    if (qt >= 12) {
-        // ✅ ACHOU O COPO — atualiza posição
-        novoXImg = somaX / qt;
-        novoYImg = somaY / qt;
-        copo.buscaX = novoXImg;
-        copo.buscaY = novoYImg;
-        copo.quadrosPerdidos = 0;
-        encontrado = true;
-        etiqueta.textContent = '🎯 ACOMPANHANDO';
+        const novoX = (novoImgX / canvas.width) * rect.width;
+        const novoY = (novoImgY / canvas.height) * rect.height;
+
+        // Suaviza
+        alvo.suavX = alvo.suavX * (1 - alvo.fatorSuav) + novoX * alvo.fatorSuav;
+        alvo.suavY = alvo.suavY * (1 - alvo.fatorSuav) + novoY * alvo.fatorSuav;
+
+        alvo.x = alvo.suavX;
+        alvo.y = alvo.suavY;
+        posicao(alvo.x, alvo.y);
     } else {
-        // ⚠️ Não achou agora — espera, não sai correndo atrás de outro
-        copo.quadrosPerdidos++;
-        if (copo.quadrosPerdidos < 30) {
-            // Espera quieto perto do último local
-            etiqueta.textContent = '🔍 PROCURANDO...';
-            encontrado = true;
-        } else if (copo.quadrosPerdidos < copo.maxPerdidos) {
-            // Amplia a busca aos poucos
-            etiqueta.textContent = '🔍 BUSCANDO MAIS LONGE...';
-            encontrado = true;
-        } else {
-            // Continua esperando — NÃO DESISTE
-            etiqueta.textContent = '⏳ AGUARDANDO APARECER...';
-            encontrado = true;
+        // Não achou agora — espera, não solta
+        alvo.perdidos++;
+        if (alvo.perdidos < alvo.maxPerdidos) {
+            // Mantém onde estava, continua procurando
         }
+        // Não some, não para
     }
 
-    // Converte para tela
-    let novoX = (novoXImg / canvas.width) * rect.width;
-    let novoY = (novoYImg / canvas.height) * rect.height;
-
-    // === SÓ MEXE SE TIVER MOVIMENTO REAL ===
-    const movimento = Math.hypot(novoX - copo.xAnterior, novoY - copo.yAnterior);
-
-    if (movimento < copo.limiarMovimento) {
-        // 🟢 PARADO — mantém firme
-        copo.parado = true;
-        // Não atualiza suave — fica exatamente onde está
-    } else {
-        // 🔄 MEXENDO — segue com suavidade
-        copo.parado = false;
-    }
-
-    // Suavização controlada — sem loucura
-    copo.suavX = copo.suavX * (1 - copo.fatorResposta) + novoX * copo.fatorResposta;
-    copo.suavY = copo.suavY * (1 - copo.fatorResposta) + novoY * copo.fatorResposta;
-
-    // Salva valores anteriores
-    copo.xAnterior = copo.x;
-    copo.yAnterior = copo.y;
-    copo.x = copo.suavX;
-    copo.y = copo.suavY;
-
-    // Coloca a gotinha — PONTA NO COPO
-    posicionar(copo.x, copo.y);
-
-    // Status
-    const estado = copo.parado ? '🟢 PARADO' : '🔄 MOVENDO';
-    dados.innerHTML = `${estado} | Pontos: ${qt} | Perdidos: ${copo.quadrosPerdidos}`;
-
-    // CONTINUA — NÃO PARA
-    requestAnimationFrame(vigiar);
+    requestAnimationFrame(seguir);
 }
 
-// === PONTA DA GOTINHA NO PONTO EXATO ===
-function posicionar(px, py) {
+// Coloca a ponta da gotinha no copo
+function posicao(px, py) {
     marcador.style.left = (px - 28) + 'px';
     marcador.style.top = (py - 64) + 'px';
 }
 
-// === TROCAR DE COPO ===
+// Trocar de copo — só isso
 btnNovo.addEventListener('click', () => {
-    copo.ativo = false;
+    alvo.fixado = false;
     marcador.style.display = 'none';
-    btnNovo.style.display = 'none';
-    btnMarcar.style.display = 'block';
-    cabecalho.innerHTML = '👆 TOQUE NO NOVO COPO PARA MARCAR!';
-    dados.innerHTML = 'Aguardando...';
+    btnNovo.classList.add('escondido');
+    aviso.textContent = '👆 TOQUE NO NOVO COPO PARA FIXAR';
 });
-
-// === TOQUE = MARCAR ===
-document.addEventListener('touchstart', marcar, { passive: false });
-document.addEventListener('mousedown', marcar);
 </script>
 </body>
 </html>
