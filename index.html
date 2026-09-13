@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — SEM DETECTAR O DEDO ✅</title>
+<title>COPOS — SUPER RÁPIDO ⚡</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -23,7 +23,7 @@
         border-radius: 8px;
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
-        transition: left 0.01s linear, top 0.01s linear;
+        transition: none; /* ⚡ SEM ATRASO */
     }
 
     .roxo { background: #9933ff; color: #9933ff; }
@@ -80,7 +80,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE LADO DE FORA DO COPO — NÃO TAPA O CENTRO
+        👆 TOQUE NA BORDA DO COPO — SEM TAPAR O MEIO
     </div>
 
     <div class="botoes">
@@ -104,14 +104,13 @@ let streamAtual = null;
 
 const alvo = {
     marcado: false,
-    corRef: { r:0, g:0, b:0, tol:42 },
+    corRef: { r:0, g:0, b:0, tol:48 }, // Mais flexível = não perde fácil
     x:0, y:0, imgX:0, imgY:0,
     velocX:0, velocY:0,
-    raioBusca:110,
-    resp:0.92,
+    raioBusca:140, // Busca mais ampla
+    resp:1.0, // ⚡ 100% — SEM ATRASO
     perdidos:0,
-    maxPerdidos:600,
-    // ZONA PROTEGIDA — ONDE O DEDO NÃO MEXE
+    maxPerdidos:800, // Aguenta muito sem ver
     raioIgnorarDedo:45
 };
 
@@ -130,7 +129,7 @@ async function ligarCamera() {
                 facingMode: 'environment',
                 width: { ideal: 1280, min: 640 },
                 height: { ideal: 720, min: 480 },
-                frameRate: { ideal: 30, min: 15 }
+                frameRate: { ideal: 60, min: 30 } // ⚡ MAIOR FPS = MAIS FLUÍDO
             },
             audio: false
         });
@@ -143,16 +142,14 @@ async function ligarCamera() {
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
 
-        aviso.innerHTML = '✅ PRONTO! Toque na PEDRA — sem tampar o meio!';
+        aviso.innerHTML = '✅ PRONTO! Toque na borda do copo!';
 
     } catch (erro) {
         alert('Permita a câmera! 📷');
     }
 }
 
-// SALVA ONDE FOI TOCADO PRA IGNORAR O DEDO
-let toqueX = -9999;
-let toqueY = -9999;
+let toqueX = -9999, toqueY = -9999;
 
 function marcarPedrinha(e) {
     e.preventDefault();
@@ -161,7 +158,6 @@ function marcarPedrinha(e) {
     const t = e.touches ? e.touches[0] : e;
     const rect = cam.getBoundingClientRect();
 
-    // ONDE O DEDO TOCU — GUARDA PRA IGNORAR DEPOIS
     toqueX = (t.clientX / rect.width) * canvas.width;
     toqueY = (t.clientY / rect.height) * canvas.height;
 
@@ -176,35 +172,25 @@ function marcarPedrinha(e) {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     let r=0, g=0, b=0, q=0;
 
-    // PEGA A COR AO REDOR — FORA DO DEDO
-    for (let dy = -55; dy <= 55; dy += 2) {
-        for (let dx = -55; dx <= 55; dx += 2) {
+    for (let dy = -55; dy <= 55; dy += 3) { // ⚡ PULA PIXELS = MAIS RÁPIDO
+        for (let dx = -55; dx <= 55; dx += 3) {
             const px = Math.round(alvo.imgX + dx);
             const py = Math.round(alvo.imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            
-            // ✅ IGNORA O CENTRO — ONDE O DEDO TÁ TAPANDO
             const dist = Math.hypot(dx, dy);
-            if (dist < alvo.raioIgnorarDedo) continue;
-            if (dist > 55) continue;
+            if (dist < alvo.raioIgnorarDedo || dist > 55) continue;
 
             const i = (py * canvas.width + px) * 4;
             r += dados[i]; g += dados[i+1]; b += dados[i+2]; q++;
         }
     }
 
-    if (q < 10) {
-        alvo.corRef.r = 128;
-        alvo.corRef.g = 128;
-        alvo.corRef.b = 128;
-    } else {
-        alvo.corRef.r = Math.round(r / q);
-        alvo.corRef.g = Math.round(g / q);
-        alvo.corRef.b = Math.round(b / q);
-    }
+    alvo.corRef.r = q ? Math.round(r/q) : 128;
+    alvo.corRef.g = q ? Math.round(g/q) : 128;
+    alvo.corRef.b = q ? Math.round(b/q) : 128;
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ MARCADO! Mexa os copos — as cores ficam grudadas!';
+    aviso.innerHTML = '✅ MARCADO! Mexa rápido — não solta! ⚡';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -213,30 +199,27 @@ function marcarPedrinha(e) {
 }
 
 function rastrear() {
-    if (!alvo.marcado || !canvas) {
-        requestAnimationFrame(rastrear);
-        return;
-    }
+    if (!alvo.marcado || !canvas) return requestAnimationFrame(rastrear);
 
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    const centroX = alvo.imgX + alvo.velocX * 0.6;
-    const centroY = alvo.imgY + alvo.velocY * 0.6;
+    // ⚡ PREVISÃO INTELIGENTE — PRA NÃO FICAR ATRÁS
+    const centroX = alvo.imgX + alvo.velocX * 1.0;
+    const centroY = alvo.imgY + alvo.velocY * 1.0;
 
     let somaX = 0, somaY = 0, q = 0;
 
-    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 2) {
-        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 2) {
+    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 3) { // ⚡ MAIS RÁPIDO
+        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 3) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
 
-            // ✅ NÃO OLHA ONDE O DEDO TAVA — FICA FORA
-            const distToque = Math.hypot(px - toqueX, py - toqueY);
-            if (distToque < alvo.raioIgnorarDedo * 0.7) continue;
+            // Ignora zona do dedo
+            if (Math.hypot(px - toqueX, py - toqueY) < alvo.raioIgnorarDedo * 0.7) continue;
 
             const i = (py * canvas.width + px) * 4;
             const dr = Math.abs(dados[i] - alvo.corRef.r);
@@ -249,26 +232,27 @@ function rastrear() {
         }
     }
 
-    if (q >= 8) {
+    if (q >= 5) { // ⚡ MENOS PONTOS PRA RESPONDER MAIS RÁPIDO
         const novoIX = somaX / q;
         const novoIY = somaY / q;
         const dX = novoIX - alvo.imgX;
         const dY = novoIY - alvo.imgY;
 
-        alvo.velocX = dX * 0.85 + alvo.velocX * 0.15;
-        alvo.velocY = dY * 0.85 + alvo.velocY * 0.15;
+        // ⚡ VELOCIDADE ALTA — SEGUE INSTANTÂNEO
+        alvo.velocX = dX * 0.95 + alvo.velocX * 0.05;
+        alvo.velocY = dY * 0.95 + alvo.velocY * 0.05;
 
         const novoX = (novoIX / canvas.width) * rect.width;
         const novoY = (novoIY / canvas.height) * rect.height;
 
-        alvo.x = alvo.x * (1 - alvo.resp) + novoX * alvo.resp;
-        alvo.y = alvo.y * (1 - alvo.resp) + novoY * alvo.resp;
+        alvo.x = novoX; // ⚡ SEM ATRASO — DIRETO
+        alvo.y = novoY;
         alvo.imgX = novoIX;
         alvo.imgY = novoIY;
         alvo.perdidos = 0;
     } else {
         alvo.perdidos++;
-        // SEGUE A DIREÇÃO — NÃO SOLTA MESMO SEM VER
+        // ⚡ CONTINUA SEGUINDO A DIREÇÃO MESMO SEM VER
         alvo.imgX += alvo.velocX;
         alvo.imgY += alvo.velocY;
         alvo.x = (alvo.imgX / canvas.width) * rect.width;
@@ -296,7 +280,7 @@ btnReiniciar.onclick = () => {
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     btnReligar.style.display = 'block';
-    aviso.innerHTML = '👆 TOQUE LADO DE FORA DO COPO — NÃO TAPA O CENTRO';
+    aviso.innerHTML = '👆 TOQUE NA BORDA DO COPO — SEM TAPAR O MEIO';
 };
 
 ligarCamera();
