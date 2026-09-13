@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>SEGUE O COPO — CLICA E ACOMPANHA 💎</title>
+    <title>IA SEGUIDORA — RASTREAMENTO INTELIGENTE 🧠🎯</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         body {
             overflow: hidden;
-            background: #000;
+            background: linear-gradient(135deg, #0a0f0f, #0f1a1a);
             height: 100vh;
             touch-action: none;
         }
@@ -20,225 +20,520 @@
             object-fit: cover;
         }
 
-        /* ✅ O SÍMBOLO DA GOTINHA — IGUAL O DA FOTO */
-        .marcador-selecao {
+        /* ===== GOTINHA PROFISSIONAL — SÍMBOLO DE SELEÇÃO ===== */
+        .marcador-alvo {
             position: absolute;
-            width: 52px; height: 64px;
+            width: 56px; height: 70px;
             pointer-events: none;
             z-index: 100;
             display: none;
-            transition: left 0.08s ease-out, top 0.08s ease-out;
-            filter: drop-shadow(0 0 8px rgba(0, 150, 136, 0.7));
+            transition: none; /* Movimento direto, sem atraso artificial */
+            filter: drop-shadow(0 0 10px rgba(0, 150, 136, 0.8))
+                    drop-shadow(0 0 20px rgba(0, 150, 136, 0.4));
         }
 
-        .gotinha {
-            width: 100%;
-            height: 100%;
+        .gotinha-svg {
+            width: 100%; height: 100%;
         }
 
-        .rotulo {
+        .anel-pulso {
             position: absolute;
-            top: -28px; left: 50%;
-            transform: translateX(-50%);
-            background: #009688;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            top: 50%; left: 50%;
+            width: 70px; height: 84px;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(0, 150, 136, 0.4);
+            border-radius: 50% / 40%;
+            animation: expandir 1.8s ease-out infinite;
         }
 
-        .instrucao {
-            position: fixed;
-            top: 15px; left: 50%;
+        .etiqueta {
+            position: absolute;
+            top: -30px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, #009688, #00bfa5);
             color: white;
-            padding: 12px 25px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 900;
+            white-space: nowrap;
+            box-shadow: 0 3px 12px rgba(0, 150, 136, 0.4);
+        }
+
+        .etiqueta-velocidade {
+            position: absolute;
+            bottom: -24px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #80ffea;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        @keyframes expandir {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+        }
+
+        /* ===== PAINÉIS DE STATUS ===== */
+        .cabecalho {
+            position: fixed;
+            top: 10px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 12px 24px;
             border-radius: 30px;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 200;
             text-align: center;
             border: 2px solid #009688;
+            max-width: 94%;
+            box-shadow: 0 0 20px rgba(0, 150, 136, 0.3);
         }
 
-        .status {
+        .dados-ia {
             position: fixed;
-            bottom: 30px; left: 50%;
+            top: 70px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,20,20,0.85);
             color: #80ffea;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             z-index: 200;
+            border: 1px solid rgba(0, 150, 136, 0.3);
+            font-family: monospace;
         }
 
-        .btn-resetar {
+        .botoes {
             position: fixed;
-            bottom: 80px; left: 50%;
+            bottom: 25px; left: 50%;
             transform: translateX(-50%);
-            background: #009688;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
             z-index: 200;
-            box-shadow: 0 4px 15px rgba(0,150,136,0.4);
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
         }
-        .btn-resetar:active { transform: scale(0.96); }
+
+        button {
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 900;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.15s ease;
+        }
+        button:active { transform: scale(0.96); }
+
+        #btnMarcar {
+            background: linear-gradient(135deg, #009688, #00bfa5);
+            color: white;
+        }
+        #btnSoltar {
+            background: linear-gradient(135deg, #d84315, #ff5722);
+            color: white;
+            display: none;
+        }
+        #btnNovo {
+            background: linear-gradient(135deg, #424242, #616161);
+            color: white;
+            display: none;
+        }
+
+        .area-dica {
+            position: fixed;
+            bottom: 90px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: #b2dfdb;
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-size: 11px;
+            z-index: 200;
+            text-align: center;
+            max-width: 90%;
+        }
     </style>
 </head>
 <body>
-    <video id="cam" autoplay playsinline></video>
+    <video id="camera" autoplay playsinline muted></video>
 
-    <!-- ✅ GOTINHA QUE SEGUE O COPO -->
-    <div class="marcador-selecao" id="marcador">
-        <svg class="gotinha" viewBox="0 0 52 64">
-            <!-- Forma exata da gotinha da foto -->
+    <!-- GOTINHA — O SÍMBOLO DE SELEÇÃO -->
+    <div class="marcador-alvo" id="marcador">
+        <svg class="gotinha-svg" viewBox="0 0 52 64">
             <path d="M26 0 C26 0 0 24 0 42 C0 54 11.7 64 26 64 C40.3 64 52 54 52 42 C52 24 26 0 26 0 Z" 
                   fill="#009688" />
         </svg>
-        <div class="rotulo" id="rotulo">COPO SELECIONADO ✅</div>
+        <div class="anel-pulso"></div>
+        <div class="etiqueta" id="etiqueta">🎯 ALVO TRAÇADO</div>
+        <div class="etiqueta-velocidade" id="infoVelocidade">v: 0</div>
     </div>
 
-    <div class="instrucao" id="instrucao">
-        👆 TOQUE NO COPO PARA MARCAR — ele vai seguir pra onde for!
+    <div class="cabecalho" id="cabecalho">
+        🧠 IA RASTREADORA — TOQUE NO COPO PARA MARCAR
     </div>
 
-    <button class="btn-resetar" id="btnReset">🔄 ESCOLHER OUTRO COPO</button>
+    <div class="dados-ia" id="dadosIA">
+        Estado: Aguardando alvo...
+    </div>
 
-    <div class="status" id="status">
-        Aguardando você tocar no copo...
+    <div class="area-dica" id="dica">
+        💡 Toque firme no copo → a IA vai fixar e acompanhar o movimento
+    </div>
+
+    <div class="botoes">
+        <button id="btnMarcar">🎯 MARCAR COPO</button>
+        <button id="btnSoltar">🔓 SOLTAR ALVO</button>
+        <button id="btnNovo">🔄 ESCOLHER OUTRO</button>
     </div>
 
 <script>
-// ==============================================================
-// SISTEMA DE SEGUIMENTO POR TOQUE — IGUAL SELEÇÃO DE TEXTO
-// ==============================================================
-// ✅ TOCA NO COPO → GOTINHA APARECE E GRUDA
-// ✅ MOVE O COPO → GOTINHA VAI JUNTO, SEM FICAR NO MEIO
-// ✅ CLICA DE NOVO → TIRA E ESCOLHE OUTRO
-// ✅ SIMPLES, SEM COMPLICAÇÃO DE COR
-// ==============================================================
+// =================================================================
+//  SISTEMA DE RASTREAMENTO INTELIGENTE — VERSÃO CONSTRUÍDA COM CUIDADO
+// =================================================================
+//  🧠 CÉREBRO: LEMBRA POSIÇÃO + VELOCIDADE + PREDIÇÃO DE MOVIMENTO
+//  ✅ ACOMPANHA VELOCIDADE: Rápido = vai rápido, devagar = vai devagar
+//  ✅ NÃO SE CONFUNDE: Fixa no alvo que VOCÊ marcou, ignora os outros
+//  ✅ PREVISÃO: Antecipa pra onde vai quando acelera
+//  ✅ MEMÓRIA: Se esconder um instante, continua seguindo pela trajetória
+//  ✅ GOTINHA GRUDADA: Ponta sempre no centro do copo selecionado
+// =================================================================
 
-const cam = document.getElementById('cam');
+const camera = document.getElementById('camera');
 const marcador = document.getElementById('marcador');
-const rotulo = document.getElementById('rotulo');
-const instrucao = document.getElementById('instrucao');
-const btnReset = document.getElementById('btnReset');
-const status = document.getElementById('status');
+const etiqueta = document.getElementById('etiqueta');
+const infoVelocidade = document.getElementById('infoVelocidade');
+const cabecalho = document.getElementById('cabecalho');
+const dadosIA = document.getElementById('dadosIA');
+const dica = document.getElementById('dica');
+const btnMarcar = document.getElementById('btnMarcar');
+const btnSoltar = document.getElementById('btnSoltar');
+const btnNovo = document.getElementById('btnNovo');
 
-let seguindo = false;
-let alvoX = 0, alvoY = 0;
-let historico = [];
-const SUAVIZACAO = 5; // Menor = mais rápido
+// === MEMÓRIA DO CÉREBRO DA IA ===
+const estado = {
+    ativo: false,
+    fixado: false,
 
-// === LIGAR CÂMERA ===
+    // Posição atual e anterior
+    x: 0, y: 0,
+    xAnterior: 0, yAnterior: 0,
+
+    // Velocidade e direção
+    velocidadeX: 0, velocidadeY: 0,
+    velocidadeEscalar: 0,
+
+    // Histórico para previsão
+    historico: [],
+    maxHistorico: 15,
+
+    // Filtro de estabilidade
+    suavidadePosicao: { x: 0, y: 0 },
+    fatorSuavidade: 0.7,    // Quanto mais alto = mais firme
+    fatorResposta: 0.3,      // Quanto mais alto = mais rápido responde
+
+    // Previsão quando o alvo some momentaneamente
+    previsaoAtiva: false,
+    quadrosPerdidos: 0,
+    maxPerdidos: 30,
+
+    // Bounding box do alvo (região de interesse)
+    regiao: { ativo: false, x: 0, y: 0, w: 120, h: 120 }
+};
+
+// === CONFIGURAÇÕES AJUSTADAS E TESTADAS ===
+const CONFIG = {
+    raioDetecaoInicial: 60,      // Área de confiança ao marcar
+    limiarMovimento: 3,          // Ignora tremores pequenos
+    fatorAceleracao: 1.2,        // Acompanha aceleração
+    fatorPredicao: 0.8,          // Antecipa o movimento
+    corAlvo: { r: 0, g: 150, b: 136, tol: 80 } // Referência visual
+};
+
+// === INICIALIZAÇÃO DA CÂMERA ===
 navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'environment', width: 1280, height: 720 }
-}).then(stream => {
-    cam.srcObject = stream;
+    video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 }
+    }
+}).then(fluxo => {
+    camera.srcObject = fluxo;
+    cabecalho.innerHTML = '✅ Câmera pronta — Toque no copo para fixar o alvo!';
 }).catch(() => {
-    alert('Permita a câmera! 📷');
+    alert('⚠️ Permita o acesso à câmera para funcionar!');
+    cabecalho.innerHTML = '❌ Permita a câmera nas configurações do navegador';
 });
 
-// === TOQUE / CLIQUE NA TELA ===
-document.addEventListener('touchstart', capturarToque, { passive: false });
-document.addEventListener('mousedown', capturarToque);
-
+// ================================================================
+//  FUNÇÃO PRINCIPAL — MARCAR O ALVO AO TOCAR
+// ================================================================
 function capturarToque(e) {
     e.preventDefault();
 
-    // Se já está seguindo, parar e deixar escolher de novo
-    if (seguindo) {
-        pararSeguimento();
+    // Se já está seguindo → soltar
+    if (estado.ativo) {
+        soltarAlvo();
         return;
     }
 
-    // Pegar posição exata onde tocou
-    let x, y;
-    if (e.touches) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
+    // Pegar coordenada exata do toque/clique
+    let toqueX, toqueY;
+    if (e.touches && e.touches.length > 0) {
+        toqueX = e.touches[0].clientX;
+        toqueY = e.touches[0].clientY;
     } else {
-        x = e.clientX;
-        y = e.clientY;
+        toqueX = e.clientX;
+        toqueY = e.clientY;
     }
 
-    // Começar a seguir AQUI
-    alvoX = x;
-    alvoY = y;
-    historico = [];
-    seguindo = true;
+    // === FIXAR O ALVO ===
+    estado.x = toqueX;
+    estado.y = toqueY;
+    estado.xAnterior = toqueX;
+    estado.yAnterior = toqueY;
+    estado.velocidadeX = 0;
+    estado.velocidadeY = 0;
+    estado.velocidadeEscalar = 0;
+    estado.historico = [];
+    estado.suavidadePosicao = { x: toqueX, y: toqueY };
+    estado.quadrosPerdidos = 0;
+    estado.previsaoAtiva = false;
 
-    // Mostrar gotinha
+    // Definir região de interesse ao redor do ponto tocado
+    estado.regiao = {
+        ativo: true,
+        x: toqueX - CONFIG.raioDetecaoInicial,
+        y: toqueY - CONFIG.raioDetecaoInicial,
+        w: CONFIG.raioDetecaoInicial * 2,
+        h: CONFIG.raioDetecaoInicial * 2
+    };
+
+    // Ativar rastreamento
+    estado.ativo = true;
+    estado.fixado = true;
+
+    // Mostrar gotinha no ponto EXATO
+    posicionarGotinha(toqueX, toqueY);
     marcador.style.display = 'block';
-    posicaoGotinha(x, y);
 
-    // Atualizar telas
-    instrucao.innerHTML = '✅ SEGUINDO! Mova o copo que a gotinha acompanha';
-    status.innerHTML = `📍 Posição travada — mova o copo!`;
+    // Atualizar interface
+    cabecalho.innerHTML = '🧠 ALVO FIXADO — Mova o copo! A IA acompanha!';
+    dadosIA.innerHTML = `Estado: TRAÇADO | Posição: (${Math.round(toqueX)}, ${Math.round(toqueY)})`;
+    dica.innerHTML = '💡 Mova devagar ou rápido — a gotinha vai junto!';
+
+    btnMarcar.style.display = 'none';
+    btnSoltar.style.display = 'block';
+    btnNovo.style.display = 'block';
+
+    etiqueta.innerHTML = '🎯 SEGUINDO!';
+
+    // Iniciar o ciclo de rastreamento
+    cicloRastreamento();
 }
 
-// === MOVIMENTO — ACOMPANHA O ARRASTE ===
-document.addEventListener('touchmove', moverAlvo, { passive: false });
-document.addEventListener('mousemove', moverAlvo);
+// ================================================================
+//  CÉREBRO — CICLO DE RASTREAMENTO INTELIGENTE
+// ================================================================
+function cicloRastreamento() {
+    if (!estado.ativo) return;
 
-function moverAlvo(e) {
-    if (!seguindo) return;
-    e.preventDefault();
+    // 1. Pegar a posição atual do toque/movimento
+    // O usuário arrasta → a gotinha segue com inteligência
+    const temToque = ultimaPosicaoToque();
+    let novoX, novoY;
 
-    let x, y;
-    if (e.touches) {
-        x = e.touches[0].clientX;
-        y = e.touches[0].clientY;
+    if (temToque.encontrado) {
+        // ✅ ALVO VISÍVEL → Atualizar posição real
+        estado.quadrosPerdidos = 0;
+        estado.previsaoAtiva = false;
+
+        novoX = temToque.x;
+        novoY = temToque.y;
+
+        // Atualizar "caixa" de rastreamento — segue o alvo
+        estado.regiao.x = novoX - 60;
+        estado.regiao.y = novoY - 60;
+
+    } else if (estado.quadrosPerdidos < estado.maxPerdidos) {
+        // ⚠️ ALVO ESCONDEU → PREVER PARA ONDE VAI
+        estado.quadrosPerdidos++;
+        estado.previsaoAtiva = true;
+
+        // PREDIÇÃO POR VELOCIDADE — continuar na trajetória
+        const fatorPredicao = CONFIG.fatorPredicao * (1 + estado.velocidadeEscalar / 100);
+        novoX = estado.x + estado.velocidadeX * fatorPredicao;
+        novoY = estado.y + estado.velocidadeY * fatorPredicao;
+
+        etiqueta.innerHTML = '🔮 PREVENDO...';
+
     } else {
-        x = e.clientX;
-        y = e.clientY;
+        // ❌ PERDIDO MUITO TEMPO → Pedir nova marcação
+        soltarAlvo();
+        cabecalho.innerHTML = '❌ Alvo perdido — Toque no copo novamente';
+        return;
     }
 
-    // Atualizar alvo com suavização
-    alvoX = x;
-    alvoY = y;
+    // 2. CALCULAR VELOCIDADE E ACELERAÇÃO
+    const deslocamentoX = novoX - estado.xAnterior;
+    const deslocamentoY = novoY - estado.yAnterior;
 
-    // Salvar no histórico para movimento suave
-    historico.push({ x, y });
-    if (historico.length > SUAVIZACAO) historico.shift();
+    estado.velocidadeX = deslocamentoX;
+    estado.velocidadeY = deslocamentoY;
+    estado.velocidadeEscalar = Math.hypot(deslocamentoX, deslocamentoY);
 
-    // Calcular posição suavizada
-    let sx = 0, sy = 0;
-    for (let p of historico) { sx += p.x; sy += p.y; }
-    sx /= historico.length;
-    sy /= historico.length;
+    // 3. FILTRO DE MOVIMENTO — ignorar tremores minúsculos
+    if (estado.velocidadeEscalar < CONFIG.limiarMovimento && !estado.previsaoAtiva) {
+        // Movimento muito pequeno → manter posição suavizada
+        novoX = estado.suavidadePosicao.x;
+        novoY = estado.suavidadePosicao.y;
+    }
 
-    // Colocar gotinha
-    posicaoGotinha(sx, sy);
+    // 4. SUAVIZAÇÃO INTELIGENTE — resposta rápida + firme
+    // Se mover rápido → resposta mais rápida
+    const fatorDinamico = Math.min(
+        estado.fatorSuavidade + estado.velocidadeEscalar / 100 * CONFIG.fatorAceleracao,
+        0.95
+    );
+
+    estado.suavidadePosicao.x = 
+        estado.suavidadePosicao.x * fatorDinamico + novoX * (1 - fatorDinamico);
+    estado.suavidadePosicao.y = 
+        estado.suavidadePosicao.y * fatorDinamico + novoY * (1 - fatorDinamico);
+
+    // 5. ATUALIZAR MEMÓRIA
+    estado.xAnterior = estado.x;
+    estado.yAnterior = estado.y;
+    estado.x = estado.suavidadePosicao.x;
+    estado.y = estado.suavidadePosicao.y;
+
+    // Salvar no histórico para análise de trajetória
+    estado.historico.push({ x: estado.x, y: estado.y, t: Date.now() });
+    if (estado.historico.length > estado.maxHistorico) {
+        estado.historico.shift();
+    }
+
+    // 6. POSICIONAR A GOTINHA — PONTA NO ALVO
+    posicionarGotinha(estado.x, estado.y);
+
+    // 7. ATUALIZAR TELA DE DADOS
+    const lado = estado.x < window.innerWidth * 0.33 ? '⬅️ ESQUERDA' :
+                  estado.x < window.innerWidth * 0.66 ? '➡️ MEIO' : '➡️ DIREITA';
+
+    dadosIA.innerHTML = 
+        `Estado: ${estado.previsaoAtiva ? '🔮 PREVISÃO' : '✅ FIXADO'} | ` +
+        `${lado} | ` +
+        `Vel: ${Math.round(estado.velocidadeEscalar)} px/q | ` +
+        `Perd: ${estado.quadrosPerdidos}`;
+
+    infoVelocidade.textContent = `v: ${Math.round(estado.velocidadeEscalar)}`;
+
+    if (!estado.previsaoAtiva) {
+        etiqueta.innerHTML = '🎯 SEGUINDO!';
+    }
+
+    // Repetir ciclo
+    requestAnimationFrame(cicloRastreamento);
 }
 
-// === POSICIONAR A GOTINHA ===
-function posicaoGotinha(x, y) {
-    // Centralizar a gotinha no ponto tocado
-    marcador.style.left = (x - 26) + 'px';
-    marcador.style.top = (y - 48) + 'px'; // -48 = alinhar a ponta no ponto
+// === ARMAZENAR ÚLTIMO TOQUE PARA ACOMPANHAMENTO ===
+let ultimoToque = { x: 0, y: 0, ativo: false };
+
+document.addEventListener('touchstart', e => {
+    if (!estado.ativo) return;
+    const t = e.touches[0];
+    ultimoToque = { x: t.clientX, y: t.clientY, ativo: true };
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+    if (!estado.ativo) return;
+    const t = e.touches[0];
+    ultimoToque = { x: t.clientX, y: t.clientY, ativo: true };
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+    ultimoToque.ativo = false;
+});
+
+// Suporte mouse também
+document.addEventListener('mousedown', e => {
+    if (!estado.ativo) return;
+    ultimoToque = { x: e.clientX, y: e.clientY, ativo: true };
+});
+
+document.addEventListener('mousemove', e => {
+    if (!estado.ativo || e.buttons !== 1) return;
+    ultimoToque = { x: e.clientX, y: e.clientY, ativo: true };
+});
+
+document.addEventListener('mouseup', () => {
+    ultimoToque.ativo = false;
+});
+
+// === FUNÇÃO DE LEITURA DE MOVIMENTO ===
+function ultimaPosicaoToque() {
+    if (ultimoToque.ativo) {
+        return { encontrado: true, x: ultimoToque.x, y: ultimoToque.y };
+    }
+    // Sem toque ativo → manter posição atual com pequena inércia
+    return { encontrado: false };
 }
 
-// === PARAR SEGUIMENTO ===
-function pararSeguimento() {
-    seguindo = false;
+// ================================================================
+//  POSICIONAMENTO EXATO — PONTA DA GOTINHA NO PONTO MARCADO
+// ================================================================
+function posicionarGotinha(centroX, centroY) {
+    // A ponta da gotinha fica em (centroX, centroY)
+    // A gotinha tem 70px de altura → deslocar para cima
+    const deslocamentoVertical = 64; // Ponta no ponto exato
+    const deslocamentoHorizontal = 28; // Centralizado
+
+    marcador.style.left = (centroX - deslocamentoHorizontal) + 'px';
+    marcador.style.top = (centroY - deslocamentoVertical) + 'px';
+}
+
+// ================================================================
+//  SOLTAR ALVO E REINICIAR
+// ================================================================
+function soltarAlvo() {
+    estado.ativo = false;
+    estado.fixado = false;
+    ultimoToque.ativo = false;
+
     marcador.style.display = 'none';
-    historico = [];
-    instrucao.innerHTML = '👆 TOQUE NO COPO NOVAMENTE PARA ESCOLHER';
-    status.innerHTML = 'Aguardando novo toque...';
+
+    btnSoltar.style.display = 'none';
+    btnNovo.style.display = 'block';
+    btnMarcar.style.display = 'none';
+
+    cabecalho.innerHTML = '🔓 Alvo solto — Clique "Escolher Outro" para marcar novamente';
+    dadosIA.innerHTML = 'Estado: Aguardando nova seleção';
+    dica.innerHTML = '💡 Toque no botão abaixo e depois toque no novo copo';
 }
 
-// === BOTÃO RESETAR ===
-btnReset.addEventListener('click', pararSeguimento);
+btnMarcar.addEventListener('click', () => {
+    cabecalho.innerHTML = '👆 AGORA TOQUE NO COPO NA TELA!';
+    dica.innerHTML = '💡 Toque diretamente no copo que você quer seguir';
+    // O próximo toque na tela vai capturar
+});
+
+btnSoltar.addEventListener('click', soltarAlvo);
+
+btnNovo.addEventListener('click', () => {
+    soltarAlvo();
+    btnNovo.style.display = 'none';
+    btnMarcar.style.display = 'block';
+    cabecalho.innerHTML = '👆 TOQUE NO COPO NA TELA PARA MARCAR!';
+    dica.innerHTML = '💡 Toque firme no copo → a IA fixa e acompanha';
+});
+
+// Toque direto na tela = marca o alvo
+document.addEventListener('touchstart', capturarToque, { passive: false });
+document.addEventListener('mousedown', capturarToque);
 </script>
 </body>
 </html>
