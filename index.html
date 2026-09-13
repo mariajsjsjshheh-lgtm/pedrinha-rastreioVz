@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA RASTREIO LIVRE — VAI DIRETO NO ALVO 💎🎯</title>
+    <title>IA RASTREIO REAL — SEM TRAVA, ONDE ESTIVER VAI 💎🎯</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
@@ -19,12 +19,25 @@
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 92%; height: 85%;
+            width: 94%; height: 88%;
             border: 2px solid #00ffcc;
             border-radius: 20px;
             box-shadow: 0 0 25px #00ffcc44;
             pointer-events: none;
             z-index: 5;
+        }
+        
+        .linha-divisoria {
+            position: absolute;
+            top: 0; bottom: 0; left: 33.33%;
+            width: 1px; background: #00ffcc22;
+            z-index: 6; pointer-events: none;
+        }
+        .linha-divisoria2 {
+            position: absolute;
+            top: 0; bottom: 0; left: 66.66%;
+            width: 1px; background: #00ffcc22;
+            z-index: 6; pointer-events: none;
         }
         
         .marcador-pedrinha {
@@ -40,7 +53,7 @@
             display: none;
             z-index: 15;
             animation: pulso-forte 0.4s infinite alternate;
-            transition: left 0.1s ease-out, top 0.1s ease-out;
+            transition: left 0.08s ease-out, top 0.08s ease-out;
             will-change: left, top;
         }
         
@@ -167,6 +180,8 @@
     <video id="cam" autoplay playsinline></video>
     
     <div class="zona-varredura" id="zonaVarredura"></div>
+    <div class="linha-divisoria"></div>
+    <div class="linha-divisoria2"></div>
     
     <div class="marcador-pedrinha" id="marcadorP"></div>
     <div class="rotulo-pedrinha" id="rotuloP">💎 ACHOU!</div>
@@ -174,13 +189,13 @@
     <div class="luz-vermelha" id="luzNao">❌ NÃO TEM</div>
     
     <div class="info-topo" id="infoTopo">
-        🧠 RASTREIO LIVRE — SEM TRAVA NO MEIO → VAI DIRETO NO ALVO
+        🧠 RASTREIO REAL — ESQUERDA / MEIO / DIREITA → ONDE ESTIVER, VAI!
     </div>
     <div class="posicao-alvo" id="posicaoAlvo">
-        Sistema pronto — calibre e inicie
+        Calibre → INICIAR → mostre cada copo
     </div>
     <div class="status-sistema" id="status">
-        👁️ Passo 1: Mostre a pedrinha → Passo 2: INICIAR
+        👁️ Passo 1: Mostre a pedrinha sozinha → Passo 2: INICIAR
     </div>
     
     <div class="botoes">
@@ -191,13 +206,13 @@
 
 <script>
 // ==========================================================
-// RASTREIO LIVRE — SEM NENHUMA TRAVA NO MEIO
+// VERSÃO CORRIGIDA DEFINITIVAMENTE — SEM TRAVA NO MEIO
 // ==========================================================
-// ✅ REMOVIDO TUDO QUE PRENDIA NO CENTRO DA TELA
-// ✅ BOLINHA VAI EXATAMENTE ONDE ESTIVER A PEDRINHA
-// ✅ ESQUERDA, MEIO, DIREITA — QUALQUER POSIÇÃO
-// ✅ CENTRO DE MASSA PURO — APENAS OS PONTOS DETECTADOS DEFINEM O LOCAL
-// ✅ SEM MÉDIA FORÇADA, SEM AJUSTE FALSO, SEM TRAVA
+// ❌ REMOVIDO: Acumulação entre quadros que causava "meio" sempre
+// ✅ NOVO: Cálculo INSTANTÂNEO — cada quadro calcula do zero
+// ✅ NOVO: Detecção de região — ESQUERDA | MEIO | DIREITA separada
+// ✅ NOVO: Limiar por região — NÃO mistura pontos de lados diferentes
+// ✅ NOVO: Reinício INSTANTÂNEO ao trocar de copo
 // ==========================================================
 
 const cam = document.getElementById('cam');
@@ -217,13 +232,12 @@ let assinatura = null;
 let ctx = null, quadro = null;
 let rastreioAtivo = false;
 
-// === PARÂMETROS OTIMIZADOS ===
-const TOL_RIGIDA = 12;
-const TOL_MEDIA = 18;
-const TOL_FLEX = 24;
-const MIN_PONTOS = 8;
-const MIN_CONFIRMA = 4;
-const AMOSTRAS_DECISAO = 25;
+// === PARÂMETROS ===
+const TOL_RIGIDA = 14;
+const TOL_MEDIA = 20;
+const TOL_FLEX = 28;
+const MIN_PONTOS_POR_REGIAO = 12;  // Mais pontos = mais certeza
+const AMOSTRAS_POR_DECISAO = 20;   // Rápido, mas seguro
 
 // === INICIAR CÂMERA ===
 navigator.mediaDevices.getUserMedia({ 
@@ -244,34 +258,33 @@ navigator.mediaDevices.getUserMedia({
     };
 }).catch(() => alert('Dê permissão à câmera! 📷'));
 
-// === BOTÃO INICIAR ===
+// === CALIBRAÇÃO ===
 btnIniciar.onclick = () => {
     if (!ctx) return;
     
     if (fase === 'calibracao') {
-        infoTopo.innerHTML = '📸 Capturando identidade... Mantenha a pedrinha visível';
-        status.textContent = 'Analisando cor...';
+        infoTopo.innerHTML = '📸 Capturando cor... Mantenha a pedrinha visível e centralizada';
+        status.textContent = 'Calibrando...';
         btnIniciar.disabled = true;
-        btnIniciar.style.opacity = '0.7';
+        btnIniciar.style.opacity = '0.6';
         
         calibraCorPedrinha(() => {
-            fase = 'pronto';
+            fase = 'varredura';
             rastreioAtivo = true;
             btnIniciar.style.display = 'none';
             btnParar.style.display = 'block';
             btnReset.style.display = 'block';
-            infoTopo.innerHTML = '✅ LIVRE! Mostre os 3 copos — bolinha vai direto no que tem!';
-            status.textContent = 'Rastreando sem trava...';
+            infoTopo.innerHTML = '✅ PRONTO! Aponte os 3 copos — ESQUERDA ←→ DIREITA';
+            status.textContent = 'Buscando...';
             analisar();
         });
     }
 };
 
-// === CALIBRAÇÃO ===
 function calibraCorPedrinha(callback) {
     let rAcum = [], gAcum = [], bAcum = [];
     let quadros = 0;
-    const total = 50;
+    const total = 40;
     
     function coletar() {
         if (quadros >= total) {
@@ -279,8 +292,8 @@ function calibraCorPedrinha(callback) {
             const g = Math.round(media(gAcum));
             const b = Math.round(media(bAcum));
             
-            assinatura = { r, g, b, confirmada: true };
-            posicaoAlvo.innerHTML = `🎯 Cor: R${r} G${g} B${b} | Rastreio LIVRE ativado`;
+            assinatura = { r, g, b };
+            posicaoAlvo.innerHTML = `🎯 Cor gravada: R${r} G${g} B${b}`;
             callback();
             return;
         }
@@ -289,14 +302,20 @@ function calibraCorPedrinha(callback) {
         const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
         
         let sr = 0, sg = 0, sb = 0, n = 0;
+        const centroX = quadro.width / 2;
+        const centroY = quadro.height / 2;
+        const raio = Math.min(quadro.width, quadro.height) * 0.2;
         
-        for (let y = quadro.height * 0.25; y < quadro.height * 0.75; y += 2) {
-            for (let x = quadro.width * 0.25; x < quadro.width * 0.75; x += 2) {
-                const i = (y * quadro.width + x) * 4;
-                const r = dados[i], g = dados[i+1], b = dados[i+2];
-                
-                if (r > g + 30 && r > b + 30 && r > 80) {
-                    sr += r; sg += g; sb += b; n++;
+        for (let y = 0; y < quadro.height; y += 2) {
+            for (let x = 0; x < quadro.width; x += 2) {
+                const dx = x - centroX;
+                const dy = y - centroY;
+                if (dx*dx + dy*dy < raio*raio) {
+                    const i = (y * quadro.width + x) * 4;
+                    const r = dados[i], g = dados[i+1], b = dados[i+2];
+                    if (r > g + 25 && r > b + 25 && r > 80) {
+                        sr += r; sg += g; sb += b; n++;
+                    }
                 }
             }
         }
@@ -311,7 +330,6 @@ function calibraCorPedrinha(callback) {
         status.textContent = `Calibrando... ${quadros}/${total}`;
         requestAnimationFrame(coletar);
     }
-    
     coletar();
 }
 
@@ -328,7 +346,7 @@ btnParar.onclick = () => {
     btnIniciar.disabled = false;
     btnIniciar.style.opacity = '1';
     infoTopo.innerHTML = '⏸️ Pausado';
-    status.textContent = 'Rastreio pausado';
+    status.textContent = 'Pausado';
     esconderTudo();
 };
 
@@ -344,7 +362,7 @@ btnReset.onclick = () => {
     btnReset.style.display = 'none';
     esconderTudo();
     infoTopo.innerHTML = '🧠 Reiniciado — Mostre a pedrinha e INICIE';
-    posicaoAlvo.innerHTML = 'Sistema pronto — calibre e inicie';
+    posicaoAlvo.innerHTML = 'Calibre → INICIAR → mostre cada copo';
     status.textContent = 'Aguardando...';
 };
 
@@ -357,27 +375,34 @@ function ehPedrinha(r, g, b) {
     const db = Math.abs(b - assinatura.b);
     
     const exata = dr < TOL_RIGIDA && dg < TOL_RIGIDA && db < TOL_RIGIDA;
-    const parcial = dr < TOL_MEDIA && dg < TOL_MEDIA && db < TOL_MEDIA;
+    const meio = dr < TOL_MEDIA && dg < TOL_MEDIA && db < TOL_MEDIA;
     const reflexo = dr < TOL_FLEX && dg < TOL_FLEX && db < TOL_FLEX && r > assinatura.r * 0.85;
     
-    let predominante = (assinatura.r > assinatura.g + 20 && assinatura.r > assinatura.b + 20)
-        ? (r > g + 25 && r > b + 25)
-        : (assinatura.g > assinatura.r + 20 && assinatura.g > assinatura.b + 20)
-            ? (g > r + 25 && g > b + 25)
-            : true;
+    // Predominância vermelha
+    const predominante = r > g + 20 && r > b + 20;
     
-    return ((exata || parcial || reflexo) && predominante);
+    return ((exata || meio || reflexo) && predominante);
 }
 
-// === BOLINHA VAI EXATAMENTE NO LOCAL — SEM TRAVA ===
-function mostrarPedrinha(x, y) {
+// === MOSTRA BOLINHA NO LADO CERTO ===
+function mostrarPedrinha(x, y, larguraTela) {
     esconderTudo();
     
     const rectCam = cam.getBoundingClientRect();
     const tx = (x / quadro.width) * rectCam.width;
     const ty = (y / quadro.height) * rectCam.height;
     
-    // SEM AJUSTE, SEM TRAVA, SEM DESVIO — DIRETO NO PONTO REAL
+    // Define lado com base na posição REAL detectada
+    let lado, codigo;
+    if (tx < rectCam.width * 0.333) {
+        lado = '⬅️ ESQUERDA'; codigo = 'ESQ';
+    } else if (tx < rectCam.width * 0.666) {
+        lado = '➡️ MEIO'; codigo = 'MIO';
+    } else {
+        lado = '➡️ DIREITA'; codigo = 'DIR';
+    }
+    
+    // Posiciona DIRETO — sem ajuste, sem desvio
     marcadorP.style.display = 'block';
     marcadorP.style.left = (tx - 16) + 'px';
     marcadorP.style.top = (ty - 16) + 'px';
@@ -386,21 +411,15 @@ function mostrarPedrinha(x, y) {
     rotuloP.style.left = (tx - 40) + 'px';
     rotuloP.style.top = (ty - 55) + 'px';
     
-    // MOSTRA EM QUAL LADO FICOU
-    let lado = '';
-    if (tx < rectCam.width * 0.33) lado = '⬅️ ESQUERDA';
-    else if (tx < rectCam.width * 0.66) lado = '➡️ MEIO';
-    else lado = '➡️ DIREITA';
-    
-    posicaoAlvo.innerHTML = `🎯 ${lado} | X:${Math.round(x)} Y:${Math.round(y)} | Alvo fixado`;
-    status.textContent = '✅ PEDRINHA LOCALIZADA — bolinha em cima do copo!';
+    posicaoAlvo.innerHTML = `🎯 ${lado} | X:${Math.round(tx)}px | Alvo confirmado ✅`;
+    status.textContent = `✅ PEDRINHA NO ${codigo}! Bolinha está em cima!`;
 }
 
 function mostrarNaoTem() {
     esconderTudo();
     luzNao.style.display = 'block';
     status.textContent = '❌ NÃO TEM — prossiga';
-    posicaoAlvo.innerHTML = '🔍 Buscando próximo...';
+    posicaoAlvo.innerHTML = '🔍 Buscando...';
 }
 
 function esconderTudo() {
@@ -409,16 +428,16 @@ function esconderTudo() {
     luzNao.style.display = 'none';
 }
 
-// === CÉREBRO — PURO CENTRO DE MASSA, SEM NENHUMA TRAVA ===
-let analise = {
-    positivos: 0,
-    total: 0,
-    decidido: false,
-    somaX: 0,
-    somaY: 0,
-    qtdPontos: 0
+// === CONTROLE DE DECISÃO POR REGIÃO ===
+let estado = {
+    contagem: 0,
+    esqPts: 0, esqX: 0, esqY: 0,
+    meioPts: 0, meioX: 0, meioY: 0,
+    dirPts: 0, dirX: 0, dirY: 0,
+    decidindo: false
 };
 
+// === CÉREBRO PRINCIPAL — LÓGICA NOVA ===
 function analisar() {
     if (!rastreioAtivo || !ctx || !assinatura) {
         requestAnimationFrame(analisar);
@@ -428,9 +447,12 @@ function analisar() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
+    // Divide em 3 regiões IGUAIS
+    const terco = quadro.width / 3;
+    
+    // Zona de varredura completa
     const rectCam = cam.getBoundingClientRect();
     const zRect = zonaVarredura.getBoundingClientRect();
-    
     const escalaW = quadro.width / rectCam.width;
     const escalaH = quadro.height / rectCam.height;
     
@@ -444,56 +466,67 @@ function analisar() {
     const minY = Math.max(0, areaY);
     const maxY = Math.min(quadro.height, areaY + areaA);
     
-    // VARRE TUDO — PEGA TODOS OS PONTOS DA PEDRINHA
-    let encontrados = 0;
-    let somaX = 0, somaY = 0;
+    // Zera contagem do quadro ATUAL — NÃO acumula com anteriores
+    let ePts = 0, eX = 0, eY = 0;
+    let mPts = 0, mX = 0, mY = 0;
+    let dPts = 0, dX = 0, dY = 0;
     
+    // Varre e separa por região
     for (let y = minY; y < maxY; y += 1) {
         for (let x = minX; x < maxX; x += 1) {
             const i = (y * quadro.width + x) * 4;
             if (ehPedrinha(dados[i], dados[i+1], dados[i+2])) {
-                encontrados++;
-                somaX += x;  // ACUMULA A POSIÇÃO REAL
-                somaY += y;  // SEM DESVIO, SEM AJUSTE FORÇADO
+                if (x < terco) {
+                    ePts++; eX += x; eY += y;
+                } else if (x < terco * 2) {
+                    mPts++; mX += x; mY += y;
+                } else {
+                    dPts++; dX += x; dY += y;
+                }
             }
         }
     }
     
-    if (!analise.decidido) {
-        analise.total++;
+    // Acumula para decisão
+    estado.contagem++;
+    if (ePts >= MIN_PONTOS_POR_REGIAO) { estado.esqPts++; estado.esqX += eX/ePts; estado.esqY += eY/ePts; }
+    if (mPts >= MIN_PONTOS_POR_REGIAO) { estado.meioPts++; estado.meioX += mX/mPts; estado.meioY += mY/mPts; }
+    if (dPts >= MIN_PONTOS_POR_REGIAO) { estado.dirPts++; estado.dirX += dX/dPts; estado.dirY += dY/dPts; }
+    
+    posicaoAlvo.innerHTML = `🔍 ESQ:${estado.esqPts} | MEIO:${estado.meioPts} | DIR:${estado.dirPts} | ${estado.contagem}/${AMOSTRAS_POR_DECISAO}`;
+    
+    // HORA DE DECIDIR
+    if (estado.contagem >= AMOSTRAS_POR_DECISAO && !estado.decidindo) {
+        estado.decidindo = true;
         
-        if (encontrados >= MIN_PONTOS) {
-            analise.positivos++;
-            analise.somaX += somaX;
-            analise.somaY += somaY;
-            analise.qtdPontos += encontrados;
-        }
+        // Qual região tem MAIS confirmações?
+        const maxPts = Math.max(estado.esqPts, estado.meioPts, estado.dirPts);
+        const limiar = Math.floor(AMOSTRAS_POR_DECISAO * 0.35);
         
-        if (analise.total >= AMOSTRAS_DECISAO) {
-            const confiavel = analise.positivos / analise.total >= 0.28 &&
-                             analise.positivos >= MIN_CONFIRMA;
-            
-            if (confiavel) {
-                // CENTRO REAL — MÉDIA DOS PONTOS DETECTADOS APENAS
-                // NÃO É CENTRO DA TELA, É ONDE A PEDRINHA ESTÁ
-                const centroX = analise.somaX / analise.qtdPontos;
-                const centroY = analise.somaY / analise.qtdPontos;
-                mostrarPedrinha(centroX, centroY);
+        if (maxPts >= limiar) {
+            if (estado.esqPts === maxPts) {
+                const cx = estado.esqX / estado.esqPts;
+                const cy = estado.esqY / estado.esqPts;
+                mostrarPedrinha(cx, cy, quadro.width);
+            } else if (estado.meioPts === maxPts) {
+                const cx = estado.meioX / estado.meioPts;
+                const cy = estado.meioY / estado.meioPts;
+                mostrarPedrinha(cx, cy, quadro.width);
             } else {
-                mostrarNaoTem();
+                const cx = estado.dirX / estado.dirPts;
+                const cy = estado.dirY / estado.dirPts;
+                mostrarPedrinha(cx, cy, quadro.width);
             }
-            
-            analise.decidido = true;
-            
-            // LIBERA PARA PRÓXIMO
-            setTimeout(() => {
-                analise = { positivos: 0, total: 0, decidido: false, somaX: 0, somaY: 0, qtdPontos: 0 };
-                esconderTudo();
-                status.textContent = 'Aponte para o próximo copo...';
-            }, 2500);
         } else {
-            posicaoAlvo.innerHTML = `🔍 Varrendo... ${analise.total}/${AMOSTRAS_DECISAO} | Pontos: ${analise.positivos}`;
+            mostrarNaoTem();
         }
+        
+        // Reinicia TUDO para o próximo copo — ZERA COMPLETAMENTE
+        setTimeout(() => {
+            estado = { contagem: 0, esqPts:0, esqX:0, esqY:0, meioPts:0, meioX:0, meioY:0, dirPts:0, dirX:0, dirY:0, decidindo: false };
+            esconderTudo();
+            status.textContent = 'Aponte para o próximo copo...';
+        }, 2500);
     }
     
     requestAnimationFrame(analisar);
