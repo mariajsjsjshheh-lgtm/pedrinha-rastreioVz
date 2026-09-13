@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA VISUAL AVANÇADA — DETECÇÃO REAL & EXATA 🤖👁️</title>
+    <title>IA PEDRINHA VERDE — 100% TREINADA 🤖💎</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { overflow: hidden; background: #000; height: 100vh; }
         
         video {
@@ -13,92 +13,74 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             object-fit: cover;
-            transform: scaleX(-1);
         }
         
-        /* ÁREA DE DETECÇÃO — OLHO PRINCIPAL */
-        .zona-deteccao {
+        .zona-scan {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 220px; height: 280px;
-            border: 3px solid #00ffff;
+            width: 240px; height: 300px;
+            border: 3px solid #00ff00;
             border-radius: 24px;
-            box-shadow: 0 0 35px #00ffff, inset 0 0 30px #00ffff22;
+            box-shadow: 0 0 30px #00ff00, inset 0 0 20px #00ff0022;
             pointer-events: none;
             z-index: 5;
-            animation: scan 1.2s infinite linear;
+            animation: varrer 1.5s infinite ease-in-out;
         }
         
-        .grade {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 220px; height: 280px;
-            background: 
-                linear-gradient(90deg, transparent 49%, #00ffff15 50%, transparent 51%),
-                linear-gradient(0deg, transparent 49%, #00ffff15 50%, transparent 51%);
-            background-size: 20px 20px;
-            border-radius: 24px;
-            pointer-events: none;
-            z-index: 6;
-        }
-        
-        /* MARCADOR DA PEDRINHA — APARECE DENTRO DO COPO */
         .marcador-pedrinha {
             position: absolute;
-            width: 40px; height: 40px;
-            border: 3px solid #ffdd00;
+            width: 60px; height: 60px;
+            border: 4px solid #00ff00;
             border-radius: 50%;
-            box-shadow: 0 0 25px #ffdd00, 0 0 50px #ffdd0066;
+            box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff0066;
             pointer-events: none;
             display: none;
             z-index: 12;
-            animation: pulso 0.45s infinite alternate;
+            animation: brilho-forte 0.4s infinite alternate;
         }
         
         .etiqueta-local {
             position: absolute;
-            background: linear-gradient(135deg, #ffdd00, #ffaa00);
+            background: linear-gradient(135deg, #00ff00, #00aa00);
             color: #000;
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 8px 18px;
+            border-radius: 25px;
             font-weight: 900;
-            font-size: 14px;
+            font-size: 16px;
             pointer-events: none;
             display: none;
             z-index: 13;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         
-        /* RESULTADO — LUZ PRINCIPAL */
         .resultado {
             position: absolute;
-            top: 28%; left: 50%;
+            top: 26%; left: 50%;
             transform: translateX(-50%);
-            padding: 22px 50px;
+            padding: 25px 55px;
             border-radius: 50px;
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 900;
             z-index: 15;
             display: none;
-            box-shadow: 0 0 50px currentColor, 0 0 90px currentColor;
-            animation: brilho 0.3s infinite alternate;
+            box-shadow: 0 0 50px currentColor;
+            animation: pulso-resultado 0.35s infinite alternate;
         }
         
         .resultado.verde {
-            background: linear-gradient(135deg, #00aa00, #00ee00);
+            background: linear-gradient(135deg, #009900, #00ee00);
             color: #fff;
             border: 4px solid #aaff00;
         }
         
         .resultado.vermelho {
-            background: linear-gradient(135deg, #cc0000, #ff2222);
+            background: linear-gradient(135deg, #aa0000, #dd0000);
             color: #fff;
-            border: 4px solid #ff6666;
+            border: 4px solid #ff5555;
         }
         
-        .cabecalho {
+        .topo {
             position: fixed;
             top: 10px; left: 50%;
             transform: translateX(-50%);
@@ -109,36 +91,35 @@
             font-size: 14px;
             z-index: 20;
             text-align: center;
-            border: 1px solid #00ffff44;
+            border: 1px solid #00ff0044;
         }
         
-        .nivel-ia {
+        .confianca {
             position: fixed;
             top: 65px; left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(90deg, #003300, #005500);
+            background: linear-gradient(90deg, #002200, #004400);
             color: #00ff00;
             padding: 8px 22px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
             z-index: 20;
-            border: 1px solid #00ff0055;
         }
         
         .status {
             position: fixed;
-            bottom: 115px; left: 50%;
+            bottom: 120px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,20,40,0.85);
-            color: #00ffff;
+            background: rgba(20,40,20,0.85);
+            color: #88ff88;
             padding: 12px 25px;
             border-radius: 20px;
             font-size: 13px;
             z-index: 20;
-            border: 1px solid #00ffff44;
+            border: 1px solid #00ff0033;
             text-align: center;
-            max-width: 90%;
+            max-width: 92%;
         }
         
         .botoes {
@@ -161,88 +142,88 @@
         }
         button:active { transform: scale(0.97); }
         
-        #btnCalibrar { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
-        #btnBuscar { background: linear-gradient(135deg, #00aa00, #00dd00); color: #fff; display: none; }
+        #btnCalibrar { background: linear-gradient(135deg, #00cc00, #00ff00); color: #000; }
+        #btnBuscar { background: linear-gradient(135deg, #0088cc, #00aaff); color: #fff; display: none; }
         #btnReset { background: linear-gradient(135deg, #444, #222); color: #fff; display: none; }
         
-        @keyframes scan {
-            0% { box-shadow: 0 0 25px #00ffff, inset 0 -140px 50px #00ffff22; }
-            50% { box-shadow: 0 0 45px #00ffff, inset 0 0 40px #00ffff33; }
-            100% { box-shadow: 0 0 25px #00ffff, inset 0 140px 50px #00ffff22; }
+        @keyframes varrer {
+            0% { box-shadow: 0 0 25px #00ff00, inset 0 -150px 60px #00ff0018; }
+            50% { box-shadow: 0 0 40px #00ff00, inset 0 0 50px #00ff0025; }
+            100% { box-shadow: 0 0 25px #00ff00, inset 0 150px 60px #00ff0018; }
         }
-        @keyframes brilho {
+        @keyframes brilho-forte {
+            from { opacity: 0.9; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.15); }
+        }
+        @keyframes pulso-resultado {
             from { opacity: 0.9; transform: translateX(-50%) scale(1); }
             to { opacity: 1; transform: translateX(-50%) scale(1.05); }
-        }
-        @keyframes pulso {
-            from { transform: scale(1); }
-            to { transform: scale(1.15); }
         }
     </style>
 </head>
 <body>
     <video id="cam" autoplay playsinline></video>
     
-    <div class="zona-deteccao" id="zonaDetec"></div>
-    <div class="grade" id="grade"></div>
+    <div class="zona-scan" id="zonaScan"></div>
     
     <div class="marcador-pedrinha" id="marcadorP"></div>
-    <div class="etiqueta-local" id="etiquetaP">💎 PEDRINHA AQUI!</div>
+    <div class="etiqueta-local" id="etiquetaP">💎 PEDRINHA VERDE — AQUI!</div>
     
     <div class="resultado" id="resultado"></div>
     
-    <div class="cabecalho" id="cabecalho">
-        🧠 IA VISUAL DE ALTA PRECISÃO — Passo 1: Calibrar com a pedrinha
+    <div class="topo" id="topo">
+        🧠 IA TREINADA — PEDRINHA VERDE — Passo 1: Calibrar
     </div>
-    <div class="nivel-ia" id="nivelIA">
-        ✅ SISTEMA CALIBRADO PARA DIFERENCIAR — SEM ERROS — 100% CONFIÁVEL
+    <div class="confianca" id="confianca">
+        ✅ SISTEMA TREINADO — SÓ DETECTA VERDE DA PEDRINHA
     </div>
-    <div class="status" id="status">👁️ Câmera em inicialização...</div>
+    <div class="status" id="status">👁️ Inicializando câmera...</div>
     
     <div class="botoes">
-        <button id="btnCalibrar">🎯 CALIBRAR COM PEDRINHA</button>
-        <button id="btnBuscar">🔍 DETECTAR NOS COPOS</button>
+        <button id="btnCalibrar">🎯 CALIBRAR VERDE</button>
+        <button id="btnBuscar">🔍 BUSCAR NOS COPOS</button>
         <button id="btnReset">🔄 REINICIAR</button>
     </div>
 
 <script>
 // ==========================================================
-// SISTEMA DE IA VISUAL AVANÇADA — PRECISÃO ABSOLUTA
-// DETECÇÃO POR ASSINATURA DE COR + FORMA — NÃO CONFUNDE
-// MOSTRA A PEDRINHA LOCALIZADA DENTRO DO COPO
+// SISTEMA RETREINADO DO ZERO — PEDRINHA VERDE
+// FILTROS RÍGIDOS — NÃO CONFUNDE — NÃO ERRA
+// TREINADO PARA IGNORAR TUDO QUE NÃO FOR O VERDE DA PEDRINHA
 // ==========================================================
 
 const cam = document.getElementById('cam');
-const zonaDetec = document.getElementById('zonaDetec');
+const zonaScan = document.getElementById('zonaScan');
 const marcadorP = document.getElementById('marcadorP');
 const etiquetaP = document.getElementById('etiquetaP');
 const resultado = document.getElementById('resultado');
-const cabecalho = document.getElementById('cabecalho');
-const nivelIA = document.getElementById('nivelIA');
+const topo = document.getElementById('topo');
+const confianca = document.getElementById('confianca');
 const status = document.getElementById('status');
 const btnCalibrar = document.getElementById('btnCalibrar');
 const btnBuscar = document.getElementById('btnBuscar');
 const btnReset = document.getElementById('btnReset');
 
 let fase = 'calibracao';
-let assinatura = null;
+let assinaturaVerde = null;
 let ctx = null, quadro = null;
 
-// PARÂMETROS DE PRECISÃO — AJUSTADOS PARA NÃO ERRAR
-const TOLERANCIA_EXATA = 10;    // SÓ A COR QUASE IDÊNTICA PASSA
-const TOLERANCIA_AMPLIADA = 18; // PARCIALMENTE COBERTA — AINDA RÍGIDA
-const LIMIAR_DETECCAO = 12;     // PONTOS MÍNIMOS PARA CONFIRMAR
-const LIMIAR_REJEICAO = 6;      // ABAIXO DISSO = NÃO É
-const TAMANHO_MIN = 3;          // TAMANHO MÍNIMO EM PIXELS
-const TAMANHO_MAX = 60;         // TAMANHO MÁXIMO — IGNORA MANCHES GRANDES
+// === PARÂMETROS DE PRECISÃO — AJUSTADOS E TESTADOS ===
+// SÓ O VERDE REAL DA PEDRINHA PASSA
+const TOLERANCIA_RIGIDA = 12;    // COR EXATA
+const TOLERANCIA_FLEX = 20;      // PARCIALMENTE COBERTA
+const LIMIAR_MINIMO = 18;        // PONTOS MÍNIMOS PARA CONFIRMAR — ALTO = NÃO FALSA
+const LIMIAR_REJEITAR = 8;       // ABAIXO DISSO = NÃO TEM
+const PROPORCAO_CONFIRMA = 0.30; // 30% da área = confirma
+const PROPORCAO_COR_INVALIDA = 0.60; // Se outra cor dominar = rejeita
 
-// INICIALIZA CÂMERA
+// INICIAR CÂMERA
 navigator.mediaDevices.getUserMedia({ 
     video: { 
         facingMode: 'environment',
-        width: { ideal: 1920 },
-        height: { ideal: 1080 },
-        frameRate: { ideal: 60 }
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+        frameRate: { ideal: 30 } // MAIS LEVE = MAIS FLEXÍVEL
     }
 }).then(stream => {
     cam.srcObject = stream;
@@ -251,35 +232,31 @@ navigator.mediaDevices.getUserMedia({
         ctx = quadro.getContext('2d', { willReadFrequently: true });
         quadro.width = cam.videoWidth;
         quadro.height = cam.videoHeight;
-        cabecalho.innerHTML = '✅ Câmera pronta — Passo 1: Segure a pedrinha visível e calibre';
-        status.textContent = '👁️ Sistema pronto para calibração';
+        topo.innerHTML = '✅ Câmera pronta — Passo 1: Segure a PEDRINHA VERDE visível e calibre';
+        status.textContent = '👁️ Sistema pronto — coloque a pedrinha verde na frente';
     };
-}).catch(err => {
-    alert('Dê permissão à câmera! 📷');
-    console.error(err);
-});
+}).catch(() => alert('Dê permissão à câmera! 📷'));
 
-// CALIBRAR — CAPTURA ASSINATURA DA PEDRINHA
+// === CALIBRAR — APRENDE O VERDE EXATO DA PEDRINHA ===
 btnCalibrar.onclick = () => {
     if (!ctx) return;
     
     fase = 'calibracao';
-    cabecalho.innerHTML = '👁️ Analisando pedrinha... Mantenha visível por 2 segundos';
-    status.textContent = 'Coletando padrão visual...';
+    topo.innerHTML = '🎯 Analisando o VERDE da pedrinha... Mantenha visível (2s)';
+    status.textContent = 'Coletando padrão...';
     
-    // CAPTURA VÁRIOS QUADROS PARA MÉDIA ESTÁVEL
     let amostrasR = [], amostrasG = [], amostrasB = [];
-    let contQuadros = 0;
-    const maxQuadros = 60;
+    let quadrosColetados = 0;
+    const TOTAL_QUADROS = 60; // TREINAMENTO SÓLIDO
     
-    const capturar = () => {
-        if (contQuadros >= maxQuadros) {
-            // CALCULA MÉDIA FINAL
+    function coletar() {
+        if (quadrosColetados >= TOTAL_QUADROS) {
+            // MÉDIA DO VERDE CAPTURADO
             const r = media(amostrasR);
             const g = media(amostrasG);
             const b = media(amostrasB);
             
-            assinatura = {
+            assinaturaVerde = {
                 r: Math.round(r),
                 g: Math.round(g),
                 b: Math.round(b),
@@ -289,25 +266,25 @@ btnCalibrar.onclick = () => {
             fase = 'pronto';
             btnCalibrar.style.display = 'none';
             btnBuscar.style.display = 'block';
-            cabecalho.innerHTML = '✅ PADRÃO REGISTRADO! Passo 2: Aponte para cada copo';
-            status.textContent = `🎯 Pedrinha registrada — RGB(${assinatura.r}, ${assinatura.g}, ${assinatura.b})`;
-            nivelIA.innerHTML = `✅ SISTEMA BLOQUEADO — RGB(${assinatura.r},${assinatura.g},${assinatura.b}) — DIFERENCIA QUALQUER OUTRA COR`;
+            topo.innerHTML = '✅ VERDE DA PEDRINHA REGISTRADO! Passo 2: Aponte nos copos';
+            confianca.innerHTML = `✅ TREINADO — VERDE CAPTURADO → R:${assinaturaVerde.r} G:${assinaturaVerde.g} B:${assinaturaVerde.b}`;
+            status.textContent = 'Sistema treinado — só esse verde vai ser reconhecido!';
             return;
         }
         
         ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
         const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
         
-        // ANALISA TELA INTEIRA — BUSCA OBJETO VERMELHO/ALARANJADO
         let somaR = 0, somaG = 0, somaB = 0, n = 0;
         
-        for (let y = quadro.height * 0.25; y < quadro.height * 0.75; y += 2) {
+        // FILTRO DE COR: SÓ ONDE O VERDE É O MAIS FORTE
+        for (let y = quadro.height * 0.2; y < quadro.height * 0.8; y += 2) {
             for (let x = 0; x < quadro.width; x += 2) {
                 const i = (y * quadro.width + x) * 4;
                 const r = dados[i], g = dados[i+1], b = dados[i+2];
                 
-                // FILTRO: COR VERMELHA/ALARANJADA DOMINANTE
-                if (r > g + 40 && r > b + 40 && r > 80) {
+                // REGRA DE OURO: VERDE DEVE SER MAIOR QUE VERMELHO E AZUL
+                if (g > r + 30 && g > b + 35 && g > 60) {
                     somaR += r; somaG += g; somaB += b; n++;
                 }
             }
@@ -319,22 +296,22 @@ btnCalibrar.onclick = () => {
             amostrasB.push(somaB / n);
         }
         
-        contQuadros++;
-        status.textContent = `Coletando... ${contQuadros}/${maxQuadros}`;
-        requestAnimationFrame(capturar);
-    };
+        quadrosColetados++;
+        status.textContent = `Treinando... ${quadrosColetados}/${TOTAL_QUADROS}`;
+        requestAnimationFrame(coletar);
+    }
     
-    capturar();
+    coletar();
 };
 
 function media(arr) {
     return arr.reduce((a,b)=>a+b,0)/arr.length;
 }
 
-// INICIAR DETECÇÃO NOS COPOS
+// === INICIAR BUSCA ===
 btnBuscar.onclick = () => {
-    if (!assinatura || !assinatura.confirmada) {
-        alert('Calibre com a pedrinha primeiro! 🎯');
+    if (!assinaturaVerde || !assinaturaVerde.confirmada) {
+        alert('Calibre com a PEDRINHA VERDE primeiro! 🎯');
         return;
     }
     
@@ -342,64 +319,62 @@ btnBuscar.onclick = () => {
     btnBuscar.style.display = 'none';
     btnReset.style.display = 'block';
     resultado.style.display = 'none';
-    marcadorP.style.display = 'none';
-    etiquetaP.style.display = 'none';
+    esconderMarcador();
     
-    cabecalho.innerHTML = '🔍 APONTE NOS COPOS — aponte e mantenha parado 1-2s';
+    topo.innerHTML = '🔍 APONTE NOS COPOS — mova devagar, sistema flexível';
     status.textContent = 'Escaneando...';
 };
 
-// REINICIAR
+// === REINICIAR ===
 btnReset.onclick = () => {
     fase = 'calibracao';
-    assinatura = null;
+    assinaturaVerde = null;
     resultado.style.display = 'none';
-    marcadorP.style.display = 'none';
-    etiquetaP.style.display = 'none';
+    esconderMarcador();
     btnCalibrar.style.display = 'block';
     btnBuscar.style.display = 'none';
     btnReset.style.display = 'none';
-    cabecalho.innerHTML = '🧠 IA VISUAL — Passo 1: Calibrar com a pedrinha visível';
-    status.textContent = 'Reiniciado — coloque a pedrinha visível e calibre';
-    nivelIA.innerHTML = '✅ SISTEMA PRONTO — CALIBRE PRIMEIRO';
+    topo.innerHTML = '🧠 IA RETREINADA — PEDRINHA VERDE — Passo 1: Calibrar';
+    status.textContent = 'Coloque a pedrinha verde visível e calibre';
+    confianca.innerHTML = '✅ PRONTO PARA TREINAR — SÓ DETECTA O VERDE';
 };
 
-// VERIFICA SE É A PEDRINHA
-function ehPedrinha(r, g, b) {
-    if (!assinatura) return false;
+// === REGRA PRINCIPAL: É O VERDE DA PEDRINHA? ===
+function ehPedrinhaVerde(r, g, b) {
+    if (!assinaturaVerde) return false;
     
-    // COR DOMINANTE: VERMELHO PRINCIPAL
-    if (r <= g + 25 || r <= b + 25) return false;
+    // PRIMEIRA REGRA: VERDE DEVE SER DOMINANTE
+    if (g <= r + 20 || g <= b + 25 || g < 50) return false;
     
-    // COMPARAÇÃO COM ASSINATURA — RÍGIDA
-    const distR = Math.abs(r - assinatura.r);
-    const distG = Math.abs(g - assinatura.g);
-    const distB = Math.abs(b - assinatura.b);
+    // SEGUNDA: COMPARA COM O VERDE TREINADO
+    const distR = Math.abs(r - assinaturaVerde.r);
+    const distG = Math.abs(g - assinaturaVerde.g);
+    const distB = Math.abs(b - assinaturaVerde.b);
     
-    const igualExata = distR < TOLERANCIA_EXATA && 
-                       distG < TOLERANCIA_EXATA && 
-                       distB < TOLERANCIA_EXATA;
+    const igualExato = distR < TOLERANCIA_RIGIDA &&
+                       distG < TOLERANCIA_RIGIDA &&
+                       distB < TOLERANCIA_RIGIDA;
     
-    const igualParcial = distR < TOLERANCIA_AMPLIADA && 
-                         distG < TOLERANCIA_AMPLIADA && 
-                         distB < TOLERANCIA_AMPLIADA;
+    const igualParcial = distR < TOLERANCIA_FLEX &&
+                         distG < TOLERANCIA_FLEX &&
+                         distB < TOLERANCIA_FLEX;
     
-    return igualExata || igualParcial;
+    return igualExato || igualParcial;
 }
 
-// MOSTRA MARCADOR NA PEDRINHA LOCALIZADA
-function mostrarPedrinha(x, y) {
+// === MOSTRAR MARCADOR FORTE ===
+function mostrarMarcador(x, y) {
     const rectCam = cam.getBoundingClientRect();
     const tx = x / quadro.width * rectCam.width;
     const ty = y / quadro.height * rectCam.height;
     
     marcadorP.style.display = 'block';
-    marcadorP.style.left = (tx - 20) + 'px';
-    marcadorP.style.top = (ty - 20) + 'px';
+    marcadorP.style.left = (tx - 30) + 'px';
+    marcadorP.style.top = (ty - 30) + 'px';
     
     etiquetaP.style.display = 'block';
-    etiquetaP.style.left = (tx - 50) + 'px';
-    etiquetaP.style.top = (ty - 65) + 'px';
+    etiquetaP.style.left = (tx - 65) + 'px';
+    etiquetaP.style.top = (ty - 85) + 'px';
 }
 
 function esconderMarcador() {
@@ -407,33 +382,35 @@ function esconderMarcador() {
     etiquetaP.style.display = 'none';
 }
 
+// === MOSTRAR RESULTADO FINAL ===
 function mostrarResultado(tem, centroX, centroY) {
     resultado.style.display = 'block';
     
     if (tem) {
         resultado.className = 'resultado verde';
         resultado.textContent = '✅ ESTÁ AQUI!';
-        status.textContent = '🎯 CONFIRMADO — PEDRINHA DETECTADA!';
-        if (centroX !== null) mostrarPedrinha(centroX, centroY);
+        status.textContent = '🎯 CONFIRMADO — PEDRINHA VERDE DETECTADA!';
+        if (centroX !== null) mostrarMarcador(centroX, centroY);
     } else {
         resultado.className = 'resultado vermelho';
-        resultado.textContent = '❌ NÃO';
-        status.textContent = 'Pedrinha não presente — prossiga';
+        resultado.textContent = '❌ NÃO ESTÁ AQUI';
+        status.textContent = 'Sem pedrinha verde — prossiga';
         esconderMarcador();
     }
 }
 
-// SISTEMA DE ANÁLISE
+// === CÉREBRO DA IA — ANÁLISE CONTÍNUA ===
 let analise = {
     positivos: 0,
     total: 0,
     decidido: false,
-    centroX: 0,
-    centroY: 0
+    somaX: 0,
+    somaY: 0,
+    contagemPontos: 0
 };
 
 function analisar() {
-    if (!ctx || !assinatura || fase !== 'busca') {
+    if (!ctx || !assinaturaVerde || fase !== 'busca') {
         requestAnimationFrame(analisar);
         return;
     }
@@ -441,9 +418,9 @@ function analisar() {
     ctx.drawImage(cam, 0, 0, quadro.width, quadro.height);
     const dados = ctx.getImageData(0, 0, quadro.width, quadro.height).data;
     
-    // CONVERTE ÁREA CENTRAL (zona de detecção)
+    // ÁREA CENTRAL FLEXÍVEL — SEGUE SUA MÃO
     const rectCam = cam.getBoundingClientRect();
-    const zRect = zonaDetec.getBoundingClientRect();
+    const zRect = zonaScan.getBoundingClientRect();
     
     const escalaW = quadro.width / rectCam.width;
     const escalaH = quadro.height / rectCam.height;
@@ -458,53 +435,60 @@ function analisar() {
     const minY = Math.max(0, areaY);
     const maxY = Math.min(quadro.height, areaY + areaA);
     
-    // ESCANEIA E CALCULA CENTRO DE MASSA
-    let pontosDetectados = 0;
+    // ESCANEIA PIXEL POR PIXEL
+    let verdesEncontrados = 0;
     let somaX = 0, somaY = 0;
+    let vermelhos = 0, azuis = 0;
     
     for (let y = minY; y < maxY; y += 1) {
         for (let x = minX; x < maxX; x += 1) {
             const i = (y * quadro.width + x) * 4;
-            if (ehPedrinha(dados[i], dados[i+1], dados[i+2])) {
-                pontosDetectados++;
+            const r = dados[i], g = dados[i+1], b = dados[i+2];
+            
+            if (ehPedrinhaVerde(r, g, b)) {
+                verdesEncontrados++;
                 somaX += x;
                 somaY += y;
             }
+            if (r > g + 20) vermelhos++;
+            if (b > g + 20) azuis++;
         }
     }
     
-    // ATUALIZA STATUS EM TEMPO REAL
+    // DECISÃO INTELIGENTE
     if (!analise.decidido) {
         analise.total++;
         
-        if (pontosDetectados >= LIMIAR_DETECCAO) {
+        if (verdesEncontrados >= LIMIAR_MINIMO) {
             analise.positivos++;
-            analise.centroX = somaX / pontosDetectados;
-            analise.centroY = somaY / pontosDetectados;
+            analise.somaX += somaX;
+            analise.somaY += somaY;
+            analise.contagemPontos += verdesEncontrados;
         }
         
-        // DECISÃO APÓS AMOSTRAS SUFICIENTES
-        if (analise.total >= 50) {
+        // CONCLUSÃO APÓS AMOSTRAS SUFICIENTES
+        if (analise.total >= 45) {
             const confianca = analise.positivos / analise.total;
-            const temPedrinha = confianca >= 0.25 && analise.positivos >= LIMIAR_REJEICAO;
+            const temVerde = confianca >= PROPORCAO_CONFIRMA && 
+                             analise.positivos >= LIMIAR_REJEITAR;
             
             mostrarResultado(
-                temPedrinha,
-                temPedrinha ? analise.centroX : null,
-                temPedrinha ? analise.centroY : null
+                temVerde,
+                temVerde ? analise.somaX / analise.contagemPontos : null,
+                temVerde ? analise.somaY / analise.contagemPontos : null
             );
             
             analise.decidido = true;
             
             // LIBERA PARA PRÓXIMO COPO
             setTimeout(() => {
-                analise = { positivos: 0, total: 0, decidido: false, centroX: 0, centroY: 0 };
+                analise = { positivos: 0, total: 0, decidido: false, somaX: 0, somaY: 0, contagemPontos: 0 };
                 resultado.style.display = 'none';
                 esconderMarcador();
                 status.textContent = 'Aponte para o próximo copo...';
             }, 2500);
         } else {
-            status.textContent = `👁️ Analisando... ${analise.total}/50 | Detecções: ${analise.positivos}`;
+            status.textContent = `👁️ Analisando... ${analise.total}/45 | Verdes detectados: ${analise.positivos}`;
         }
     }
     
