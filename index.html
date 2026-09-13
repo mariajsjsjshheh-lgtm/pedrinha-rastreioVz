@@ -3,28 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>TRACKER PEDRINHA — SUPER PREGADO</title>
+<title>TRACKER PEDRINHA — SUPER PREGADO ⚡</title>
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: sans-serif;
-    }
-
-    body {
-        overflow: hidden;
-        background: #000;
-        height: 100vh;
-        touch-action: none;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+    body { overflow: hidden; background: #000; height: 100vh; touch-action: none; }
 
     video {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         object-fit: cover;
     }
 
@@ -36,116 +23,52 @@
         border-radius: 8px;
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
-        transition: left 0.012s linear, top 0.012s linear, width 0.012s linear, height 0.012s linear;
+        transition: left 0.01s linear, top 0.01s linear;
     }
 
-    .roxo {
-        background: #9933ff;
-        color: #9933ff;
-    }
-
-    .preto {
-        background: #111111;
-        color: #444444;
-        border: 3px solid #777;
-    }
-
-    .amarelo {
-        background: #ffcc00;
-        color: #ffcc00;
-    }
+    .roxo { background: #9933ff; color: #9933ff; }
+    .preto { background: #111; color: #444; border: 3px solid #777; }
+    .amarelo { background: #ffcc00; color: #ffcc00; }
 
     .etiqueta {
         position: absolute;
-        top: -24px;
-        left: 50%;
+        top: -24px; left: 50%;
         transform: translateX(-50%);
-        color: white;
-        font-size: 12px;
-        font-weight: 900;
-        padding: 4px 12px;
-        border-radius: 12px;
-        white-space: nowrap;
+        color: white; font-size: 12px; font-weight: 900;
+        padding: 4px 12px; border-radius: 12px; white-space: nowrap;
     }
-
-    .roxo .etiqueta {
-        background: #9933ff;
-    }
-
-    .preto .etiqueta {
-        background: #444;
-    }
-
-    .amarelo .etiqueta {
-        background: #ffcc00;
-        color: #000;
-    }
+    .roxo .etiqueta { background: #9933ff; }
+    .preto .etiqueta { background: #444; }
+    .amarelo .etiqueta { background: #ffcc00; color: #000; }
 
     .aviso {
-        position: fixed;
-        top: 12px;
-        left: 50%;
+        position: fixed; top: 12px; left: 50%;
         transform: translateX(-50%);
-        background: rgba(0,0,0,0.88);
-        color: white;
-        padding: 12px 24px;
-        border-radius: 30px;
-        font-size: 14px;
-        z-index: 200;
-        border: 2px solid #9933ff;
-        text-align: center;
-        max-width: 95%;
+        background: rgba(0,0,0,0.88); color: white;
+        padding: 12px 24px; border-radius: 30px; font-size: 14px;
+        z-index: 200; border: 2px solid #9933ff; text-align: center; max-width: 95%;
     }
 
     .botoes {
-        position: fixed;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        justify-content: center;
-        z-index: 200;
+        position: fixed; bottom: 25px; left: 50%;
+        transform: translateX(-50%); display: flex; gap: 10px; flex-wrap: wrap;
+        justify-content: center; z-index: 200;
     }
 
     button {
-        padding: 12px 20px;
-        font-size: 13px;
-        font-weight: bold;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
+        padding: 12px 20px; font-size: 13px; font-weight: bold;
+        border: none; border-radius: 50px; cursor: pointer;
     }
+    button:active { transform: scale(0.96); }
 
-    button:active {
-        transform: scale(0.96);
-    }
-
-    #btnMarcar {
-        background: #9933ff;
-        color: white;
-    }
-
-    #btnReiniciar {
-        background: #009688;
-        color: white;
-        display: none;
-    }
+    #btnMarcar { background: #9933ff; color: white; }
+    #btnReiniciar { background: #009688; color: white; display: none; }
 
     .instrucao {
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        background: rgba(0,0,0,0.80);
-        padding: 10px 18px;
-        border-radius: 20px;
-        font-size: 13px;
-        z-index: 200;
-        max-width: 90%;
-        text-align: center;
+        position: fixed; bottom: 85px; left: 50%;
+        transform: translateX(-50%); color: white;
+        background: rgba(0,0,0,0.8); padding: 10px 18px;
+        border-radius: 20px; font-size: 13px; z-index: 200; max-width: 90%; text-align: center;
     }
 </style>
 </head>
@@ -162,13 +85,8 @@
         <div class="etiqueta">🟡 AMARELO</div>
     </div>
 
-    <div class="aviso" id="aviso">
-        👆 TOQUE NO COPO COM A PEDRINHA
-    </div>
-
-    <div class="instrucao" id="instrucao">
-        Depois de marcar, embaralhe os copos. As 3 cores vão seguir o mesmo copo.
-    </div>
+    <div class="aviso" id="aviso">👆 TOQUE NO COPO COM A PEDRINHA</div>
+    <div class="instrucao">Depois de marcar, embaralhe — as 3 cores ficam grudadas no copo!</div>
 
     <div class="botoes">
         <button id="btnMarcar">🎯 MARCAR PEDRINHA</button>
@@ -188,217 +106,153 @@ let canvas, ctx;
 
 const alvo = {
     marcado: false,
-    corRef: { r: 0, g: 0, b: 0, tol: 45 },
-    x: 0,
-    y: 0,
-    imgX: 0,
-    imgY: 0,
-    ultX: 0,
-    ultY: 0,
-    velocX: 0,
-    velocY: 0,
-    raioBusca: 130,
-    resp: 0.88,
-    perdidos: 0,
-    maxPerdidos: 600
+    corRef: { r:0, g:0, b:0, tol:42 },
+    x:0, y:0, imgX:0, imgY:0,
+    velocX:0, velocY:0,
+    raioBusca:130,
+    resp:0.92, // ⚡ SUPER RÁPIDO — grudado
+    perdidos:0,
+    maxPerdidos:600 // Nunca solta fácil
 };
 
 const coberturas = [
-    { el: cRoxo, w: 78, h: 105, deslocX: -90, deslocY: 0 },
-    { el: cPreto, w: 85, h: 110, deslocX: 0, deslocY: 0 },
-    { el: cAmarelo, w: 78, h: 105, deslocX: 90, deslocY: 0 }
+    { el:cRoxo, w:75, h:105, deslX:-95, deslY:0 },
+    { el:cPreto, w:85, h:110, deslX:0, deslY:0 },
+    { el:cAmarelo, w:75, h:105, deslX:95, deslY:0 }
 ];
 
 navigator.mediaDevices.getUserMedia({
-    video: {
-        facingMode: 'environment',
-        width: 1280,
-        height: 720,
-        frameRate: 30
-    }
+    video: { facingMode:'environment', width:1280, height:720, frameRate:30 }
 }).then(fluxo => {
     cam.srcObject = fluxo;
     cam.onloadedmetadata = () => {
         canvas = document.createElement('canvas');
-        ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx = canvas.getContext('2d', { willReadFrequently:true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
         aviso.innerHTML = '✅ Câmera pronta — Toque no copo com a pedrinha';
     };
-}).catch(() => {
-    alert('Permita o acesso à câmera! 📷');
-});
+}).catch(() => alert('Permita a câmera! 📷'));
 
 function marcarPedrinha(e) {
     e.preventDefault();
-
     if (!canvas || alvo.marcado) return;
 
-    let tx, ty;
-
-    if (e.touches) {
-        tx = e.touches[0].clientX;
-        ty = e.touches[0].clientY;
-    } else {
-        tx = e.clientX;
-        ty = e.clientY;
-    }
-
+    const t = e.touches ? e.touches[0] : e;
     const rect = cam.getBoundingClientRect();
 
-    alvo.x = tx;
-    alvo.y = ty;
-    alvo.ultX = tx;
-    alvo.ultY = ty;
-    alvo.imgX = (tx / rect.width) * canvas.width;
-    alvo.imgY = (ty / rect.height) * canvas.height;
-    alvo.perdidos = 0;
+    alvo.x = t.clientX;
+    alvo.y = t.clientY;
+    alvo.imgX = (alvo.x / rect.width) * canvas.width;
+    alvo.imgY = (alvo.y / rect.height) * canvas.height;
     alvo.marcado = true;
+    alvo.perdidos = 0;
 
-    ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
-    const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    ctx.drawImage(cam,0,0,canvas.width,canvas.height);
+    const dados = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    let r=0,g=0,b=0,q=0;
 
-    let r = 0, g = 0, b = 0, q = 0;
-
-    for (let dy = -50; dy <= 50; dy += 1) {
-        for (let dx = -50; dx <= 50; dx += 1) {
-            const px = Math.round(alvo.imgX + dx);
-            const py = Math.round(alvo.imgY + dy);
-
-            if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > 50) continue;
-
-            const i = (py * canvas.width + px) * 4;
-            r += dados[i];
-            g += dados[i + 1];
-            b += dados[i + 2];
-            q++;
-        })
+    for (let dy=-50; dy<=50; dy+=2) {
+        for (let dx=-50; dx<=50; dx+=2) {
+            const px = Math.round(alvo.imgX+dx);
+            const py = Math.round(alvo.imgY+dy);
+            if (px<0||px>=canvas.width||py<0||py>=canvas.height) continue;
+            if (Math.hypot(dx,dy)>50) continue;
+            const i = (py*canvas.width + px)*4;
+            r += dados[i]; g += dados[i+1]; b += dados[i+2]; q++;
+        }
     }
 
-    alvo.corRef.r = Math.round(r / q);
-    alvo.corRef.g = Math.round(g / q);
-    alvo.corRef.b = Math.round(b / q);
+    alvo.corRef.r = Math.round(r/q);
+    alvo.corRef.g = Math.round(g/q);
+    alvo.corRef.b = Math.round(b/q);
 
-    coberturas.forEach(c => {
-        c.el.display = 'block';
-    });
-
-    aviso.innerHTML = '✅ PEDRINHA MARCADA! EMBARALHE OS COPOS';
+    coberturas.forEach(c => c.el.style.display='block');
+    aviso.innerHTML = '✅ MARCADO! EMBARALHE OS COPOS!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
 
-    rastrearAlvo();
+    rastrear();
 }
 
-function rastrearAlvo() {
-    if (!alvo.marcado || !canvas) {
-        requestAnimationFrame(rastrearAlvo);
-        return;
-    }
+function rastrear() {
+    if (!alvo.marcado || !canvas) return requestAnimationFrame(rastrear);
 
-    ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
-    const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    ctx.drawImage(cam,0,0,canvas.width,canvas.height);
+    const dados = ctx.getImageData(0,0,canvas.width,canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
+    // Previsão pra não perder
     const centroX = alvo.imgX + alvo.velocX * 0.6;
-    const centroY = alvo.velocY * 0.6;
+    const centroY = alvo.imgY + alvo.velocY * 0.6;
 
-    let somaX = 0, somaY = 0, q = 0;
+    let somaX=0, somaY=0, q=0;
 
-    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 1) {
-        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 1) {
-            const px = Math.round(centroX + dx);
-            const py = Math.round(centroY + dy);
+    for (let dy=-alvo.raioBusca; dy<=alvo.raioBusca; dy+=2) {
+        for (let dx=-alvo.raioBusca; dx<=alvo.raioBusca; dx+=2) {
+            const px = Math.round(centroX+dx);
+            const py = Math.round(centroY+dy);
+            if (px<0||px>=canvas.width||py<0||py>=canvas.height) continue;
+            if (Math.hypot(dx,dy)>alvo.raioBusca) continue;
 
-            if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
+            const i = (py*canvas.width + px)*4;
+            const dr = Math.abs(dados[i] - alvo.corRef.r);
+            const dg = Math.abs(dados[i+1] - alvo.corRef.g);
+            const db = Math.abs(dados[i+2] - alvo.corRef.b);
 
-            const i = (py * canvas.width + px) * 4;
-            const r = dados[i], g = dados[i + 1], b = dados[i + 2];
-
-            const dr = Math.abs(r - alvo.corRef.r);
-            const dg = Math.abs(g - alvo.corRef.g);
-            const db = Math.abs(b - alvo.corRef.b);
-
-            if (dr < alvo.corRef.tol && dg < alvo.corRef.tol && db < alvo.corRef.tol) {
-                somaX += px;
-                somaY += py;
-                q++;
+            if (dr<alvo.corRef.tol && dg<alvo.corRef.tol && db<alvo.corRef.tol) {
+                somaX += px; somaY += py; q++;
             }
         }
     }
 
     if (q >= 8) {
-        const novoImgX = somaX / q;
-        const novoImgY = somaY / q;
+        const novoIX = somaX/q;
+        const novoIY = somaY/q;
+        const dX = novoIX - alvo.imgX;
+        const dY = novoIY - alvo.imgY;
 
-        const deslX = novoImgX - alvo.imgX;
-        const deslY = novoImgY - alvo.y;
+        alvo.velocX = dX*0.85 + alvo.velocX*0.15;
+        alvo.velocY = dY*0.85 + alvo.velocY*0.15;
 
-        alvo.velocX = deslX * 0.8 + alvo.velocX * 0.2;
-        alvo.velocY = deslY * 0.8 + alvo.velocY * 0.2;
+        const novoX = (novoIX/canvas.width)*rect.width;
+        const novoY = (novoIY/canvas.height)*rect.height;
 
-        const novoX = (novoImgX / canvas.width) * rect.width;
-        const novoY = (novoImgY / canvas.height) * rect.height;
-
-        alvo.x = alvo.x * (1 - alvo.resp) + novoX * alvo.resp;
-        alvo.y = alvo.y * (1 - alvo.resp) + novoY * alvo.resp;
-
-        alvo.imgX = novoImgX;
-        alvo.imgY = novoImgY;
-        alvo.ultX = novoX;
-        alvo.ultY = novoY;
+        alvo.x = alvo.x*(1-alvo.resp) + novoX*alvo.resp;
+        alvo.y = alvo.y*(1-alvo.resp) + novoY*alvo.resp;
+        alvo.imgX = novoIX;
+        alvo.imgY = novoIY;
         alvo.perdidos = 0;
-    }
-
-    else {
+    } else {
         alvo.perdidos++;
-
-        if (alvo.perdidos < alvo.maxPerdidos) {
-            alvo.velocX *= 0.99;
-            alvo.velocY *= 0.99;
-
-            alvo.imgX += alvo.velocX;
-            alvo.imgY += alvo.velocY;
-
-            alvo.x = (alvo.imgX / canvas.width) * rect.width;
-            alvo.y = (alvo.imgY / canvas.height) * rect.height;
-        }
+        // Continua seguindo a direção mesmo sem ver
+        alvo.imgX += alvo.velocX;
+        alvo.imgY += alvo.velocY;
+        alvo.x = (alvo.imgX/canvas.width)*rect.width;
+        alvo.y = (alvo.imgY/canvas.height)*rect.height;
     }
 
-    posicionarCoberturas();
-    requestAnimationFrame(rastrearAlvo);
-}
-
-function posicionarCoberturas() {
     coberturas.forEach(c => {
-        c.el.style.width = c.w + 'px';
-        c.el.style.height = c.h + 'px';
-        c.el.style.left = (alvo.x - c.w / 2 + c.deslocX) + 'px';
-        c.el.style.top = (alvo.y - c.h / 2 + c.deslocY) + 'px';
-    })
-}
-
-btnMarcar.addEventListener('click', marcarPedrinha);
-
-document.addEventListener('touchstart', marcarPedrinha, { passive: false });
-document.addEventListener('mousedown', marcarPedrinha);
-
-btnReiniciar.addEventListener('click', () => {
-    alvo.marcado = false;
-    alvo.perdidos = 0;
-    alvo.velocX = 0;
-    alvo.velocY = 0;
-
-    coberturas.forEach(c => {
-        c.el.style.display = 'none';
+        c.el.style.width = c.w+'px';
+        c.el.style.height = c.h+'px';
+        c.el.style.left = (alvo.x - c.w/2 + c.deslX) + 'px';
+        c.el.style.top = (alvo.y - c.h/2 + c.deslY) + 'px';
     });
 
+    requestAnimationFrame(rastrear);
+}
+
+document.addEventListener('touchstart', marcarPedrinha, {passive:false});
+document.addEventListener('mousedown', marcarPedrinha);
+
+btnReiniciar.onclick = () => {
+    alvo.marcado = false;
+    alvo.velocX = alvo.velocY = 0;
+    coberturas.forEach(c => c.el.style.display='none');
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     aviso.innerHTML = '👆 TOQUE NO COPO COM A PEDRINHA';
-});
+};
 </script>
 </body>
 </html>
