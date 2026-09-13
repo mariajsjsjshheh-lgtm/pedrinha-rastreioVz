@@ -1,94 +1,92 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TRACKER 3 COPOS — PERFEIÇÃO TOTAL 🧠💎</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { overflow: hidden; background: #000; height: 100vh; touch-action: none; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>TRACKER 3 COPOS — VERSÃO FORTE 🧠💎</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+    body { overflow: hidden; background: #000; height: 100vh; touch-action: none; }
 
-        video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
+    video {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+    }
 
-        /* CAMADA DE COBERTURA — COR SOBRE O COPO INTEIRO */
-        .cobertura {
-            position: absolute;
-            pointer-events: none;
-            z-index: 50;
-            display: none;
-            transition: left 0.04s linear, top 0.04s linear, width 0.04s linear, height 0.04s linear;
-            border-radius: 8px;
-            opacity: 0.85;
-            box-shadow: 0 0 20px currentColor;
-        }
+    .cobertura {
+        position: absolute;
+        pointer-events: none;
+        z-index: 50;
+        display: none;
+        border-radius: 8px;
+        opacity: 0.92;
+        box-shadow: 0 0 25px currentColor;
+        transition: left 0.03s linear, top 0.03s linear, width 0.03s linear, height 0.03s linear;
+    }
 
-        .roxo { background: #9933ff; color: #9933ff; }
-        .preto { background: #222222; color: #444444; border: 2px solid #666; }
-        .amarelo { background: #ffcc00; color: #ffcc00; }
+    .roxo { background: #9933ff; color: #9933ff; }
+    .preto { background: #111111; color: #444444; border: 3px solid #777; }
+    .amarelo { background: #ffcc00; color: #ffcc00; }
 
-        .etiqueta {
-            position: absolute;
-            top: -22px; left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 11px;
-            font-weight: 900;
-            padding: 3px 10px;
-            border-radius: 12px;
-            white-space: nowrap;
-        }
-        .roxo .etiqueta { background: #9933ff; }
-        .preto .etiqueta { background: #444; }
-        .amarelo .etiqueta { background: #ffcc00; color: #000; }
+    .etiqueta {
+        position: absolute;
+        top: -24px; left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 12px;
+        font-weight: 900;
+        padding: 4px 12px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+    .roxo .etiqueta { background: #9933ff; }
+    .preto .etiqueta { background: #444; }
+    .amarelo .etiqueta { background: #ffcc00; color: #000; }
 
-        .aviso {
-            position: fixed;
-            top: 12px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 14px;
-            z-index: 200;
-            border: 2px solid #9933ff;
-            text-align: center;
-            max-width: 95%;
-        }
+    .aviso {
+        position: fixed;
+        top: 12px; left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.88);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 14px;
+        z-index: 200;
+        border: 2px solid #9933ff;
+        text-align: center;
+        max-width: 95%;
+    }
 
-        .botoes {
-            position: fixed;
-            bottom: 25px; left: 50%;
-            transform: translateX(-50%);
-            display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
-            z-index: 200;
-        }
+    .botoes {
+        position: fixed;
+        bottom: 25px; left: 50%;
+        transform: translateX(-50%);
+        display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+        z-index: 200;
+    }
 
-        button {
-            padding: 12px 20px;
-            font-size: 13px;
-            font-weight: bold;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-        }
-        button:active { transform: scale(0.96); }
+    button {
+        padding: 12px 20px;
+        font-size: 13px;
+        font-weight: bold;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+    }
+    button:active { transform: scale(0.96); }
 
-        #btnRoxo { background: #9933ff; color: white; }
-        #btnPreto { background: #333; color: white; border: 2px solid #666; }
-        #btnAmarelo { background: #ffcc00; color: #000; }
-        #btnReiniciar { background: #009688; color: white; display: none; }
-    </style>
+    #btnRoxo { background: #9933ff; color: white; }
+    #btnPreto { background: #333; color: white; border: 2px solid #666; }
+    #btnAmarelo { background: #ffcc00; color: #000; }
+    #btnReiniciar { background: #009688; color: white; display: none; }
+</style>
 </head>
 <body>
     <video id="cam" autoplay playsinline muted></video>
 
-    <!-- COBERTURAS — CADA COR NO SEU COPO -->
     <div class="cobertura roxo" id="cRoxo">
         <div class="etiqueta">🟣 ROXO — 1º COPO</div>
     </div>
@@ -111,16 +109,6 @@
     </div>
 
 <script>
-// =================================================================
-// CÉREBRO DE ALTA PRECISÃO — 3 COPOS, 3 CORES, ZERO CONFUSÃO
-// =================================================================
-// ✅ CADA COPO RECEBE SUA COR E SÓ A DELE
-// ✅ EMBARALHANDO? CADA COR FICA GRUDADA NO SEU
-// ✅ SEM TREMIDEIRA, SEM VOAR, SEM TROCAR DE COPO
-// ✅ PRECISÃO SUBPÍXEL — MOVIMENTO FLUÍDO E PERFEITO
-// ✅ MEMÓRIA DE IDENTIDADE — NÃO CONFUNDE NUNCA
-// =================================================================
-
 const cam = document.getElementById('cam');
 const cRoxo = document.getElementById('cRoxo');
 const cPreto = document.getElementById('cPreto');
@@ -133,43 +121,45 @@ const btnReiniciar = document.getElementById('btnReiniciar');
 
 let canvas, ctx;
 
-// === DADOS DE CADA COPO — IDENTIDADE ÚNICA ===
 const copos = {
     roxo: {
         marcado: false,
-        corRef: { r: 0, g: 0, b: 0, tol: 48 },
-        x: 0, y: 0, w: 85, h: 110,
+        corRef: { r: 0, g: 0, b: 0, tol: 38 },
+        x: 0, y: 0,
+        w: 85, h: 110,
         imgX: 0, imgY: 0,
         ultX: 0, ultY: 0,
         velocX: 0, velocY: 0,
-        raioBusca: 140,
-        resp: 0.45, // Rápido e firme
+        raioBusca: 100,
+        resp: 0.55,
         perdidos: 0,
-        maxPerdidos: 250
+        maxPerdidos: 320
     },
     preto: {
         marcado: false,
-        corRef: { r: 0, g: 0, b: 0, tol: 45 },
-        x: 0, y: 0, w: 85, h: 110,
+        corRef: { r: 0, g: 0, b: 0, tol: 35 },
+        x: 0, y: 0,
+        w: 85, h: 110,
         imgX: 0, imgY: 0,
         ultX: 0, ultY: 0,
         velocX: 0, velocY: 0,
-        raioBusca: 140,
-        resp: 0.45,
+        raioBusca: 100,
+        resp: 0.55,
         perdidos: 0,
-        maxPerdidos: 250
+        maxPerdidos: 320
     },
     amarelo: {
         marcado: false,
-        corRef: { r: 0, g: 0, b: 0, tol: 48 },
-        x: 0, y: 0, w: 85, h: 110,
+        corRef: { r: 0, g: 0, b: 0, tol: 38 },
+        x: 0, y: 0,
+        w: 85, h: 110,
         imgX: 0, imgY: 0,
         ultX: 0, ultY: 0,
         velocX: 0, velocY: 0,
-        raioBusca: 140,
-        resp: 0.45,
+        raioBusca: 100,
+        resp: 0.55,
         perdidos: 0,
-        maxPerdidos: 250
+        maxPerdidos: 320
     }
 };
 
@@ -178,7 +168,6 @@ let indiceAtual = 0;
 const nomes = ['roxo', 'preto', 'amarelo'];
 const elementos = { roxo: cRoxo, preto: cPreto, amarelo: cAmarelo };
 
-// === LIGAR CÂMERA ===
 navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'environment', width: 1280, height: 720, frameRate: 30 }
 }).then(fluxo => {
@@ -192,7 +181,6 @@ navigator.mediaDevices.getUserMedia({
     };
 }).catch(() => alert('Permita o acesso à câmera! 📷'));
 
-// === MARCAR COPO ATUAL ===
 function marcarAtual(e) {
     e.preventDefault();
     if (!canvas || indiceAtual >= 3) return;
@@ -209,19 +197,23 @@ function marcarAtual(e) {
     const imgX = (tx / rect.width) * canvas.width;
     const imgY = (ty / rect.height) * canvas.height;
 
-    // CAPTURAR ASSINATURA DE COR ÚNICA DO COPO
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-    let r=0, g=0, b=0, q=0;
-    for (let dy = -35; dy <= 35; dy += 2) {
-        for (let dx = -35; dx <= 35; dx += 2) {
+    let r = 0, g = 0, b = 0, q = 0;
+
+    for (let dy = -40; dy <= 40; dy += 2) {
+        for (let dx = -40; dx <= 40; dx += 2) {
             const px = Math.round(imgX + dx);
             const py = Math.round(imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-            if (Math.hypot(dx, dy) > 35) continue;
+            if (Math.hypot(dx, dy) > 40) continue;
+
             const i = (py * canvas.width + px) * 4;
-            r += dados[i]; g += dados[i+1]; b += dados[i+2]; q++;
+            r += dados[i];
+            g += dados[i + 1];
+            b += dados[i + 2];
+            q++;
         }
     }
 
@@ -229,14 +221,15 @@ function marcarAtual(e) {
     copo.corRef.g = Math.round(g / q);
     copo.corRef.b = Math.round(b / q);
 
-    // POSIÇÃO INICIAL
-    copo.x = tx; copo.y = ty;
-    copo.ultX = tx; copo.ultY = ty;
-    copo.imgX = imgX; copo.imgY = imgY;
+    copo.x = tx;
+    copo.y = ty;
+    copo.ultX = tx;
+    copo.ultY = ty;
+    copo.imgX = imgX;
+    copo.imgY = imgY;
     copo.perdidos = 0;
     copo.marcado = true;
 
-    // MOSTRAR COR SOBRE O COPO
     const el = elementos[nome];
     el.style.display = 'block';
     posicionar(el, copo);
@@ -244,7 +237,6 @@ function marcarAtual(e) {
     ordem.push(nome);
     indiceAtual++;
 
-    // LIBERAR PRÓXIMO
     if (indiceAtual === 1) {
         btnPreto.disabled = false;
         aviso.innerHTML = '🟣 ROXO MARCADO ✅ → Toque no 2º copo (PRETO)';
@@ -255,12 +247,10 @@ function marcarAtual(e) {
         aviso.innerHTML = '✅ TODOS MARCADOS! EMBARALHE OS COPOS — CADA COR SEGUE O SEU!';
         btnRoxo.disabled = btnPreto.disabled = btnAmarelo.disabled = true;
         btnReiniciar.style.display = 'block';
-        // INICIAR RASTREAMENTO CONTÍNUO
         rastrearTudo();
     }
 }
 
-// === RASTREAMENTO INTELIGENTE DE TODOS OS 3 ===
 function rastrearTudo() {
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -270,10 +260,10 @@ function rastrearTudo() {
         const copo = copos[nome];
         if (!copo.marcado) continue;
 
-        // BUSCA INTELIGENTE: perto de onde estava + projeção de movimento
         const centroX = copo.imgX + copo.velocX * 0.5;
         const centroY = copo.imgY + copo.velocY * 0.5;
         const raio = copo.raioBusca;
+
         let somaX = 0, somaY = 0, q = 0;
 
         for (let dy = -raio; dy <= raio; dy += 2) {
@@ -284,9 +274,8 @@ function rastrearTudo() {
                 if (Math.hypot(dx, dy) > raio) continue;
 
                 const i = (py * canvas.width + px) * 4;
-                const r = dados[i], g = dados[i+1], b = dados[i+2];
+                const r = dados[i], g = dados[i + 1], b = dados[i + 2];
 
-                // COMPARA COM A COR EXATA DESTE COPO
                 const dr = Math.abs(r - copo.corRef.r);
                 const dg = Math.abs(g - copo.corRef.g);
                 const db = Math.abs(b - copo.corRef.b);
@@ -299,39 +288,44 @@ function rastrearTudo() {
             }
         }
 
-        if (q >= 10) {
-            // ✅ ACHOU — atualiza com precisão
+        if (q >= 12) {
             const novoImgX = somaX / q;
             const novoImgY = somaY / q;
 
-            // Calcula velocidade real
             const deslX = novoImgX - copo.imgX;
             const deslY = novoImgY - copo.imgY;
-            copo.velocX = deslX * 0.6 + copo.velocX * 0.4;
-            copo.velocY = deslY * 0.6 + copo.velocY * 0.4;
 
-            // Converte pra tela
+            copo.velocX = deslX * 0.65 + copo.velocX * 0.35;
+            copo.velocY = deslY * 0.65 + copo.velocY * 0.35;
+
             const novoX = (novoImgX / canvas.width) * rect.width;
             const novoY = (novoImgY / canvas.height) * rect.height;
 
-            // Suavização FIRME — sem tremida, sem atraso
             copo.x = copo.x * (1 - copo.resp) + novoX * copo.resp;
             copo.y = copo.y * (1 - copo.resp) + novoY * copo.resp;
+
             copo.imgX = novoImgX;
             copo.imgY = novoImgY;
+            copo.ultX = novoX;
+            copo.ultY = novoY;
             copo.perdidos = 0;
 
-            // Atualiza posição visual
             posicionar(elementos[nome], copo);
 
         } else {
-            // ⚠️ Não achou — busca com previsão, NÃO TROCA DE COPO
             copo.perdidos++;
+
             if (copo.perdidos < copo.maxPerdidos) {
-                // Mantém última posição conhecida + busca mais ampla
-                if (copo.perdidos % 40 === 0 && copo.raioBusca < 220) {
-                    copo.raioBusca += 15;
-                }
+                copo.velocX *= 0.98;
+                copo.velocY *= 0.98;
+
+                copo.imgX += copo.velocX;
+                copo.imgY += copo.velocY;
+
+                copo.x = (copo.imgX / canvas.width) * rect.width;
+                copo.y = (copo.imgY / canvas.height) * rect.height;
+
+                posicionar(elementos[nome], copo);
             }
         }
     }
@@ -339,7 +333,6 @@ function rastrearTudo() {
     requestAnimationFrame(rastrearTudo);
 }
 
-// === POSICIONA COBERTURA CENTRADA NO COPO ===
 function posicionar(el, copo) {
     el.style.width = copo.w + 'px';
     el.style.height = copo.h + 'px';
@@ -347,12 +340,13 @@ function posicionar(el, copo) {
     el.style.top = (copo.y - copo.h / 2) + 'px';
 }
 
-// === REINICIAR TUDO ===
 btnReiniciar.addEventListener('click', () => {
     for (const nome of nomes) {
         copos[nome].marcado = false;
         copos[nome].perdidos = 0;
-        copos[nome].raioBusca = 140;
+        copos[nome].raioBusca = 100;
+        copos[nome].velocX = 0;
+        copos[nome].velocY = 0;
         elementos[nome].style.display = 'none';
     }
     ordem = [];
@@ -363,7 +357,6 @@ btnReiniciar.addEventListener('click', () => {
     aviso.innerHTML = '👆 TOQUE NO 1º COPO (ROXO)';
 });
 
-// === TOQUE = MARCAR ===
 document.addEventListener('touchstart', marcarAtual, { passive: false });
 document.addEventListener('mousedown', marcarAtual);
 </script>
