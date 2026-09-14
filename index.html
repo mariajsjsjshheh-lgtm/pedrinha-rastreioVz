@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — SUPER RÁPIDO ⚡</title>
+<title>COPOS — PEDRINHA VERMELHA ⚡</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -23,11 +23,15 @@
         border-radius: 8px;
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
-        transition: none; /* ⚡ SEM ATRASO */
+        transition: none;
     }
 
     .roxo { background: #9933ff; color: #9933ff; }
-    .preto { background: #111; color: #444; border: 3px solid #777; }
+    .preto { 
+        background: #111; color: #ff3333; 
+        border: 3px solid #ff3333; 
+        box-shadow: 0 0 20px #ff3333, 0 0 35px currentColor;
+    }
     .amarelo { background: #ffcc00; color: #ffcc00; }
 
     .etiqueta {
@@ -38,15 +42,15 @@
         padding: 4px 12px; border-radius: 12px; white-space: nowrap;
     }
     .roxo .etiqueta { background: #9933ff; }
-    .preto .etiqueta { background: #444; }
+    .preto .etiqueta { background: #ff3333; }
     .amarelo .etiqueta { background: #ffcc00; color: #000; }
 
     .aviso {
         position: fixed; top: 12px; left: 50%;
         transform: translateX(-50%);
         background: rgba(0,0,0,0.9); color: white;
-        padding: 14px 24px; border-radius: 30px; font-size: 15px;
-        z-index: 200; border: 2px solid #9933ff; text-align: center; max-width: 95%;
+        padding: 14px 24px; border-radius: 30px; font-size: 14px;
+        z-index: 200; border: 2px solid #ff3333; text-align: center; max-width: 95%;
     }
 
     .botoes {
@@ -61,7 +65,7 @@
     }
     button:active { transform: scale(0.96); }
 
-    #btnMarcar { background: #9933ff; color: white; }
+    #btnMarcar { background: #ff3333; color: white; }
     #btnReligar { background: #ff4444; color: white; }
     #btnReiniciar { background: #009688; color: white; display: none; }
 </style>
@@ -73,14 +77,14 @@
         <div class="etiqueta">🟣 ROXO</div>
     </div>
     <div class="cobertura preto" id="cPreto">
-        <div class="etiqueta">⚫ PRETO</div>
+        <div class="etiqueta">⚫ PEDRINHA VERMELHA</div>
     </div>
     <div class="cobertura amarelo" id="cAmarelo">
         <div class="etiqueta">🟡 AMARELO</div>
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NA BORDA DO COPO — SEM TAPAR O MEIO
+        👆 TOQUE NA PEDRINHA DENTRO DO COPO → ela vai ser encontrada onde estiver!
     </div>
 
     <div class="botoes">
@@ -104,20 +108,24 @@ let streamAtual = null;
 
 const alvo = {
     marcado: false,
-    corRef: { r:0, g:0, b:0, tol:48 }, // Mais flexível = não perde fácil
-    x:0, y:0, imgX:0, imgY:0,
-    velocX:0, velocY:0,
-    raioBusca:140, // Busca mais ampla
-    resp:1.0, // ⚡ 100% — SEM ATRASO
-    perdidos:0,
-    maxPerdidos:800, // Aguenta muito sem ver
-    raioIgnorarDedo:45
+    // COR DA PEDRINHA VERMELHA — é ela que vamos procurar
+    pedrinha: { r: 220, g: 40, b: 40, tol: 55 },
+    x: 0, y: 0, imgX: 0, imgY: 0,
+    velocX: 0, velocY: 0,
+    raioBusca: 160,
+    resp: 1.0, // ⚡ INSTANTÂNEO — SEM ATRASO
+    perdidos: 0,
+    maxPerdidos: 900,
+    raioIgnorarDedo: 45,
+    // ZONA DE BUSCA — procura DENTRO do copo, não em cima
+    zonaBuscaMin: 25, // começa a procurar abaixo do topo
+    zonaBuscaMax: 95  // até a base do copo
 };
 
 const coberturas = [
-    { el:cRoxo, w:75, h:105, deslX:-95, deslY:0 },
-    { el:cPreto, w:85, h:110, deslX:0, deslY:0 },
-    { el:cAmarelo, w:75, h:105, deslX:95, deslY:0 }
+    { el: cRoxo, w: 75, h: 105, deslX: -95, deslY: 0 },
+    { el: cPreto, w: 85, h: 110, deslX: 0, deslY: 0, ePedrinha: true }, // É a âncora!
+    { el: cAmarelo, w: 75, h: 105, deslX: 95, deslY: 0 }
 ];
 
 async function ligarCamera() {
@@ -129,7 +137,7 @@ async function ligarCamera() {
                 facingMode: 'environment',
                 width: { ideal: 1280, min: 640 },
                 height: { ideal: 720, min: 480 },
-                frameRate: { ideal: 60, min: 30 } // ⚡ MAIOR FPS = MAIS FLUÍDO
+                frameRate: { ideal: 60, min: 30 }
             },
             audio: false
         });
@@ -142,7 +150,7 @@ async function ligarCamera() {
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
 
-        aviso.innerHTML = '✅ PRONTO! Toque na borda do copo!';
+        aviso.innerHTML = '✅ PRONTO! Toque na PEDRINHA DENTRO do copo!';
 
     } catch (erro) {
         alert('Permita a câmera! 📷');
@@ -170,10 +178,11 @@ function marcarPedrinha(e) {
 
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    let r=0, g=0, b=0, q=0;
+    let r = 0, g = 0, b = 0, q = 0;
 
-    for (let dy = -55; dy <= 55; dy += 3) { // ⚡ PULA PIXELS = MAIS RÁPIDO
-        for (let dx = -55; dx <= 55; dx += 3) {
+    // CAPTURA A COR DA PEDRINHA NO MOMENTO DO TOQUE
+    for (let dy = -55; dy <= 55; dy += 2) {
+        for (let dx = -55; dx <= 55; dx += 2) {
             const px = Math.round(alvo.imgX + dx);
             const py = Math.round(alvo.imgY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
@@ -185,12 +194,14 @@ function marcarPedrinha(e) {
         }
     }
 
-    alvo.corRef.r = q ? Math.round(r/q) : 128;
-    alvo.corRef.g = q ? Math.round(g/q) : 128;
-    alvo.corRef.b = q ? Math.round(b/q) : 128;
+    if (q >= 5) {
+        alvo.pedrinha.r = Math.round(r / q);
+        alvo.pedrinha.g = Math.round(g / q);
+        alvo.pedrinha.b = Math.round(b / q);
+    }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ MARCADO! Mexa rápido — não solta! ⚡';
+    aviso.innerHTML = '✅ PEDRINHA MARCADA! Vai seguir onde ela estiver! 🔴';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -205,60 +216,68 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // ⚡ PREVISÃO INTELIGENTE — PRA NÃO FICAR ATRÁS
-    const centroX = alvo.imgX + alvo.velocX * 1.0;
-    const centroY = alvo.imgY + alvo.velocY * 1.0;
+    // ⚡ PREVISÃO DE MOVIMENTO — VAI ONDE O COPO VAI ESTAR
+    const centroX = alvo.imgX + alvo.velocX * 1.2;
+    const centroY = alvo.imgY + alvo.velocY * 1.2;
 
     let somaX = 0, somaY = 0, q = 0;
 
-    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 3) { // ⚡ MAIS RÁPIDO
-        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 3) {
+    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 2) {
+        for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 2) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
 
-            // Ignora zona do dedo
+            // ✅ IGNORA ZONA DO DEDO
             if (Math.hypot(px - toqueX, py - toqueY) < alvo.raioIgnorarDedo * 0.7) continue;
 
-            const i = (py * canvas.width + px) * 4;
-            const dr = Math.abs(dados[i] - alvo.corRef.r);
-            const dg = Math.abs(dados[i+1] - alvo.corRef.g);
-            const db = Math.abs(dados[i+2] - alvo.corRef.b);
+            // ✅ SÓ PROCURA DENTRO DO COPO — IGNORA O QUE TÁ MUITO EM CIMA
+            const relY = dy / alvo.raioBusca;
+            if (relY < -0.70) continue; // PULA O QUE TÁ NO TOPO DO COPO
 
-            if (dr < alvo.corRef.tol && dg < alvo.corRef.tol && db < alvo.corRef.tol) {
+            const i = (py * canvas.width + px) * 4;
+            const dr = Math.abs(dados[i] - alvo.pedrinha.r);
+            const dg = Math.abs(dados[i+1] - alvo.pedrinha.g);
+            const db = Math.abs(dados[i+2] - alvo.pedrinha.b);
+
+            // PROCURA EXATAMENTE A COR DA PEDRINHA
+            if (dr < alvo.pedrinha.tol && 
+                dg < alvo.pedrinha.tol && 
+                db < alvo.pedrinha.tol) {
                 somaX += px; somaY += py; q++;
             }
         }
     }
 
-    if (q >= 5) { // ⚡ MENOS PONTOS PRA RESPONDER MAIS RÁPIDO
+    if (q >= 4) {
         const novoIX = somaX / q;
         const novoIY = somaY / q;
         const dX = novoIX - alvo.imgX;
         const dY = novoIY - alvo.imgY;
 
-        // ⚡ VELOCIDADE ALTA — SEGUE INSTANTÂNEO
-        alvo.velocX = dX * 0.95 + alvo.velocX * 0.05;
-        alvo.velocY = dY * 0.95 + alvo.velocY * 0.05;
+        // ⚡ RESPOSTA INSTANTÂNEA — NÃO FICA ATRÁS
+        alvo.velocX = dX * 0.98 + alvo.velocX * 0.02;
+        alvo.velocY = dY * 0.98 + alvo.velocY * 0.02;
 
         const novoX = (novoIX / canvas.width) * rect.width;
         const novoY = (novoIY / canvas.height) * rect.height;
 
-        alvo.x = novoX; // ⚡ SEM ATRASO — DIRETO
+        alvo.x = novoX;
         alvo.y = novoY;
         alvo.imgX = novoIX;
         alvo.imgY = novoIY;
         alvo.perdidos = 0;
     } else {
         alvo.perdidos++;
-        // ⚡ CONTINUA SEGUINDO A DIREÇÃO MESMO SEM VER
+        // ⚡ CONTINUA SEGUINDO A DIREÇÃO — NÃO PERDE
         alvo.imgX += alvo.velocX;
         alvo.imgY += alvo.velocY;
         alvo.x = (alvo.imgX / canvas.width) * rect.width;
         alvo.y = (alvo.imgY / canvas.height) * rect.height;
     }
 
+    // ✅ TODAS AS CORES GRUDADAS NA PRETA — NENHUMA FICA PRA TRÁS
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
@@ -280,7 +299,7 @@ btnReiniciar.onclick = () => {
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     btnReligar.style.display = 'block';
-    aviso.innerHTML = '👆 TOQUE NA BORDA DO COPO — SEM TAPAR O MEIO';
+    aviso.innerHTML = '👆 TOQUE NA PEDRINHA DENTRO DO COPO';
 };
 
 ligarCamera();
