@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SEGUE A PEDRINHA PRA QUALQUER COPO ✅</title>
+<title>FIXADO NO COPO → SEGUE A PEDRINHA ✅</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -85,7 +85,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NA PEDRINHA — SEGUE ELA PRA QUALQUER COPO!
+        👆 TOQUE NO COPO → FIXA → SEGUE PEDRINHA PRA OUTRO!
     </div>
 
     <div class="botoes">
@@ -111,20 +111,21 @@ const alvo = {
     marcado: false,
     pedrinha: { r: 220, g: 40, b: 40, tol: 55 },
     x: 0, y: 0, imgX: 0, imgY: 0,
-    raioBusca: 250, // BUSCA LARGA — encontra em qualquer copo
+    // 📐 MARCADORES DESCENDO
+    deslocamentoBaixo: 30, // ↓ desceu os marcadores aqui
+    raioBusca: 250,
+    distanciaMudarCopo: 120, // quando passa disso → muda de copo
     perdidos: 0,
-    maxPerdidos: 1000,
     raioIgnorarDedo: 45,
-    alturaMin: -0.65,
-    // NÃO TRAVA MAIS — segue livre!
-    ultimoX: 0,
-    ultimoY: 0
+    alturaMin: -0.55, // não pega o de cima
+    ultimoX: 0, ultimoY: 0,
+    copoAtualX: 0, copoAtualY: 0 // centro do copo marcado
 };
 
 const coberturas = [
-    { el: cRoxo, w: 75, h: 105, deslX: -95, deslY: 0 },
-    { el: cPreto, w: 85, h: 110, deslX: 0, deslY: 0 },
-    { el: cAmarelo, w: 75, h: 105, deslX: 95, deslY: 0 }
+    { el: cRoxo, w: 75, h: 105, deslX: -95, deslY: 30 }, // ↓ desceu cada um
+    { el: cPreto, w: 85, h: 110, deslX: 0, deslY: 35 },
+    { el: cAmarelo, w: 75, h: 105, deslX: 95, deslY: 30 }
 ];
 
 async function ligarCamera() {
@@ -145,7 +146,7 @@ async function ligarCamera() {
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
-        aviso.innerHTML = '✅ PRONTO! Toque na pedrinha!';
+        aviso.innerHTML = '✅ PRONTO! Toque no copo com a pedrinha!';
     } catch (erro) { alert('Permita a câmera! 📷'); }
 }
 
@@ -167,6 +168,9 @@ function marcarPedrinha(e) {
     alvo.imgY = toqueY;
     alvo.ultimoX = toqueX;
     alvo.ultimoY = toqueY;
+    // 🔒 CENTRO DO COPO — fixa aqui
+    alvo.copoAtualX = toqueX;
+    alvo.copoAtualY = toqueY;
     alvo.marcado = true;
     alvo.perdidos = 0;
 
@@ -194,7 +198,7 @@ function marcarPedrinha(e) {
     }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ SEGUINDO! Vai pra qualquer copo!';
+    aviso.innerHTML = '✅ FIXADO! Segue pedrinha pro outro copo!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -209,13 +213,12 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // 🎯 PONTO DE BUSCA — segue pra onde a pedrinha foi
-    const centroX = alvo.imgX;
-    const centroY = alvo.imgY;
+    // 🎯 BUSCA PEDRINHA — começa no centro do copo atual
+    const centroX = alvo.copoAtualX;
+    const centroY = alvo.copoAtualY;
 
     let somaX = 0, somaY = 0, q = 0;
 
-    // 🔴 BUSCA EM TODA ÁREA AO REDOR — não fica preso!
     for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 2) {
         for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 2) {
             const px = Math.round(centroX + dx);
@@ -240,19 +243,34 @@ function rastrear() {
     }
 
     if (q >= 3) {
-        // ✅ ACHOU! VAI DIRETO PRA LÁ — MESMO QUE TENHA MUDADO DE COPO!
-        alvo.imgX = somaX / q;
-        alvo.imgY = somaY / q;
-        alvo.ultimoX = alvo.imgX;
-        alvo.ultimoY = alvo.imgY;
+        const pedrinhaX = somaX / q;
+        const pedrinhaY = somaY / q;
+
+        // 📏 A PEDRINHA MUDOU DE COPO?
+        const distCopoPedrinha = Math.hypot(
+            pedrinhaX - alvo.copoAtualX,
+            pedrinhaY - alvo.copoAtualY
+        );
+
+        if (distCopoPedrinha > alvo.distanciaMudarCopo) {
+            // ✅ SIM! VAI PRA O NOVO COPO!
+            alvo.copoAtualX = pedrinhaX;
+            alvo.copoAtualY = pedrinhaY;
+        } else {
+            // ✅ NÃO! FICA FIXADO NO COPO ATUAL
+            // segue o copo se mexendo, não a pedrinha solta
+        }
+
+        alvo.imgX = alvo.copoAtualX;
+        alvo.imgY = alvo.copoAtualY;
+        alvo.ultimoX = pedrinhaX;
+        alvo.ultimoY = pedrinhaY;
         alvo.perdidos = 0;
+
     } else {
         alvo.perdidos++;
-        // 🔍 NÃO ACHOU? BUSCA MAIS LONGE
-        if (alvo.perdidos < 30) {
-            // Segue a direção que estava indo
-        } else {
-            // Busca ampla ao redor do último ponto conhecido
+        // 🔍 Procura ao redor do último ponto
+        if (alvo.perdidos > 40) {
             const buscaTotal = 400;
             let achouX = 0, achouY = 0, achouQ = 0;
             
@@ -278,21 +296,28 @@ function rastrear() {
             }
             
             if (achouQ >= 3) {
-                // 🎯 ENCONTROU! PULA DIRETO PRO NOVO COPO!
-                alvo.imgX = achouX / achouQ;
-                alvo.imgY = achouY / achouQ;
-                alvo.ultimoX = alvo.imgX;
-                alvo.ultimoY = alvo.imgY;
+                const novoX = achouX / achouQ;
+                const novoY = achouY / achouQ;
+                const distMudar = Math.hypot(novoX - alvo.copoAtualX, novoY - alvo.copoAtualY);
+                
+                if (distMudar > alvo.distanciaMudarCopo) {
+                    alvo.copoAtualX = novoX;
+                    alvo.copoAtualY = novoY;
+                }
+                alvo.ultimoX = novoX;
+                alvo.ultimoY = novoY;
                 alvo.perdidos = 0;
             }
         }
+        alvo.imgX = alvo.copoAtualX;
+        alvo.imgY = alvo.copoAtualY;
     }
 
-    // Atualiza posição na tela
+    // Posição final na tela
     alvo.x = (alvo.imgX / canvas.width) * rect.width;
     alvo.y = (alvo.imgY / canvas.height) * rect.height;
 
-    // ✅ TODAS JUNTAS — nenhuma fica pra trás
+    // ✅ TODAS JUNTAS, MARCADORES MAIS BAIXOS
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
@@ -313,7 +338,7 @@ btnReiniciar.onclick = () => {
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     btnReligar.style.display = 'block';
-    aviso.innerHTML = '👆 TOQUE NA PEDRINHA DENTRO DO COPO';
+    aviso.innerHTML = '👆 TOQUE NO COPO COM A PEDRINHA';
 };
 
 ligarCamera();
