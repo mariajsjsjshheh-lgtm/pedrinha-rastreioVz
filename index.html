@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SEGUE CERTO — NÃO PARA ✅</title>
+<title>VELOCIDADE EXATA — SEM ATRASO ⚡</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -23,7 +23,7 @@
         border-radius: 8px;
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
-        transition: none;
+        transition: none !important;
         will-change: left, top;
     }
 
@@ -85,7 +85,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NO COPO — SEGUE SEM PARAR!
+        👆 TOQUE NO COPO — MESMA VELOCIDADE, SEM ATRASO!
     </div>
 
     <div class="botoes">
@@ -111,12 +111,11 @@ const alvo = {
     marcado: false,
     pedrinha: { r: 220, g: 40, b: 40, tol: 55 },
     x: 0, y: 0, imgX: 0, imgY: 0,
-    raioBusca: 280, // MAIS AMPLO — não perde
-    distanciaMudar: 80, // MAIS SENSÍVEL — muda rápido
-    perdidos: 0,
-    maxPerdidos: 60,
+    raioBusca: 280,
     raioIgnorarDedo: 45,
-    ultimoX: 0, ultimoY: 0
+    ultimoX: 0, ultimoY: 0,
+    perdidos: 0,
+    maxPerdidos: 45
 };
 
 // MARCADORES MAIS BAIXOS ✅
@@ -134,7 +133,7 @@ async function ligarCamera() {
                 facingMode: 'environment',
                 width: { ideal: 1280, min: 640 },
                 height: { ideal: 720, min: 480 },
-                frameRate: { ideal: 30, min: 24 }
+                frameRate: { ideal: 60, min: 30 } // ⚡ MAIS FPS = MAIS RÁPIDO
             },
             audio: false
         });
@@ -144,7 +143,7 @@ async function ligarCamera() {
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
-        aviso.innerHTML = '✅ PRONTO! Toque no copo!';
+        aviso.innerHTML = '✅ PRONTO! Velocidade real!';
     } catch (erro) { alert('Permita a câmera! 📷'); }
 }
 
@@ -193,7 +192,7 @@ function marcarPedrinha(e) {
     }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ SEGUINDO! Não para mais!';
+    aviso.innerHTML = '✅ NA MESMA VELOCIDADE! Sem atraso!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -208,7 +207,7 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // 🎯 BUSCA AO REDOR DO ÚLTIMO PONTO — SEMPRE SEGUE
+    // ⚡ BUSCA DIRETA — SEM ATRASO
     let somaX = 0, somaY = 0, q = 0;
 
     for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 2) {
@@ -232,30 +231,18 @@ function rastrear() {
     }
 
     if (q >= 3) {
-        // ✅ ACHOU — VAI DIRETO, SEM TRAVAR!
-        const novoX = somaX / q;
-        const novoY = somaY / q;
-
-        // 📏 Se afastou → muda de copo direto
-        const dist = Math.hypot(novoX - alvo.ultimoX, novoY - alvo.ultimoY);
-        if (dist > alvo.distanciaMudar) {
-            alvo.ultimoX = novoX;
-            alvo.ultimoY = novoY;
-        } else {
-            // Fica suave, segue o movimento
-            alvo.ultimoX = alvo.ultimoX * 0.7 + novoX * 0.3;
-            alvo.ultimoY = alvo.ultimoY * 0.7 + novoY * 0.3;
-        }
-
+        // ⚡ SEM SUAVIZAÇÃO — VAI DIRETO NO PONTO!
+        alvo.ultimoX = somaX / q;
+        alvo.ultimoY = somaY / q;
         alvo.imgX = alvo.ultimoX;
         alvo.imgY = alvo.ultimoY;
         alvo.perdidos = 0;
 
     } else {
         alvo.perdidos++;
-        // 🔍 Perdeu? Continua procurando, NÃO PARA!
-        if (alvo.perdidos > 30) {
-            const buscaTotal = 450;
+        // 🔍 Procura rápida se perder
+        if (alvo.perdidos > 25) {
+            const buscaTotal = 400;
             let achouX = 0, achouY = 0, achouQ = 0;
             
             for (let dy = -buscaTotal; dy <= buscaTotal; dy += 3) {
@@ -277,7 +264,6 @@ function rastrear() {
             }
             
             if (achouQ >= 3) {
-                // ✅ REENCONTROU! VAI DIRETO!
                 alvo.ultimoX = achouX / achouQ;
                 alvo.ultimoY = achouY / achouQ;
                 alvo.imgX = alvo.ultimoX;
@@ -285,14 +271,13 @@ function rastrear() {
                 alvo.perdidos = 0;
             }
         }
-        // Se não achou, NÃO PARA — mantém posição esperando
     }
 
-    // Posição final
+    // ⚡ POSIÇÃO DIRETA — SEM NENHUM ATRASO
     alvo.x = (alvo.imgX / canvas.width) * rect.width;
     alvo.y = (alvo.imgY / canvas.height) * rect.height;
 
-    // ✅ MARCADORES MAIS BAIXOS E JUNTOS
+    // ✅ TODAS JUNTAS, MARCADORES CERTOS
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
@@ -313,7 +298,7 @@ btnReiniciar.onclick = () => {
     btnMarcar.disabled = false;
     btnReiniciar.style.display = 'none';
     btnReligar.style.display = 'block';
-    aviso.innerHTML = '👆 TOQUE NO COPO COM A PEDRINHA';
+    aviso.innerHTML = '👆 TOQUE NO COPO — VELOCIDADE REAL!';
 };
 
 ligarCamera();
