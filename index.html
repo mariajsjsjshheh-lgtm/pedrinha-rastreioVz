@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — PEDRINHA VERMELHA ⚡</title>
+<title>COPOS — FIXO & RÁPIDO ⚡</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -24,6 +24,7 @@
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
         transition: none;
+        will-change: left, top; /* ⚡ FIXA RENDERIZAÇÃO */
     }
 
     .roxo { background: #9933ff; color: #9933ff; }
@@ -77,14 +78,14 @@
         <div class="etiqueta">🟣 ROXO</div>
     </div>
     <div class="cobertura preto" id="cPreto">
-        <div class="etiqueta">⚫ PEDRINHA VERMELHA</div>
+        <div class="etiqueta">⚫ PEDRINHA</div>
     </div>
     <div class="cobertura amarelo" id="cAmarelo">
         <div class="etiqueta">🟡 AMARELO</div>
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NA PEDRINHA DENTRO DO COPO → ela vai ser encontrada onde estiver!
+        👆 TOQUE NA PEDRINHA DENTRO DO COPO — FICA FIXO!
     </div>
 
     <div class="botoes">
@@ -108,30 +109,26 @@ let streamAtual = null;
 
 const alvo = {
     marcado: false,
-    // COR DA PEDRINHA VERMELHA — é ela que vamos procurar
     pedrinha: { r: 220, g: 40, b: 40, tol: 55 },
     x: 0, y: 0, imgX: 0, imgY: 0,
     velocX: 0, velocY: 0,
     raioBusca: 160,
-    resp: 1.0, // ⚡ INSTANTÂNEO — SEM ATRASO
+    resp: 1.0, // ⚡ NA MESMA VELOCIDADE DO COPO
     perdidos: 0,
     maxPerdidos: 900,
     raioIgnorarDedo: 45,
-    // ZONA DE BUSCA — procura DENTRO do copo, não em cima
-    zonaBuscaMin: 25, // começa a procurar abaixo do topo
-    zonaBuscaMax: 95  // até a base do copo
+    alturaMin: -0.65 // IGNORA O QUE TÁ MUITO EM CIMA
 };
 
 const coberturas = [
     { el: cRoxo, w: 75, h: 105, deslX: -95, deslY: 0 },
-    { el: cPreto, w: 85, h: 110, deslX: 0, deslY: 0, ePedrinha: true }, // É a âncora!
+    { el: cPreto, w: 85, h: 110, deslX: 0, deslY: 0 },
     { el: cAmarelo, w: 75, h: 105, deslX: 95, deslY: 0 }
 ];
 
 async function ligarCamera() {
     try {
         if (streamAtual) streamAtual.getTracks().forEach(t => t.stop());
-
         streamAtual = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'environment',
@@ -141,20 +138,14 @@ async function ligarCamera() {
             },
             audio: false
         });
-
         cam.srcObject = streamAtual;
         await new Promise(res => cam.onloadedmetadata = res);
-
         canvas = document.createElement('canvas');
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
-
-        aviso.innerHTML = '✅ PRONTO! Toque na PEDRINHA DENTRO do copo!';
-
-    } catch (erro) {
-        alert('Permita a câmera! 📷');
-    }
+        aviso.innerHTML = '✅ PRONTO! Toque na pedrinha dentro do copo!';
+    } catch (erro) { alert('Permita a câmera! 📷'); }
 }
 
 let toqueX = -9999, toqueY = -9999;
@@ -180,7 +171,6 @@ function marcarPedrinha(e) {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     let r = 0, g = 0, b = 0, q = 0;
 
-    // CAPTURA A COR DA PEDRINHA NO MOMENTO DO TOQUE
     for (let dy = -55; dy <= 55; dy += 2) {
         for (let dx = -55; dx <= 55; dx += 2) {
             const px = Math.round(alvo.imgX + dx);
@@ -201,7 +191,7 @@ function marcarPedrinha(e) {
     }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ PEDRINHA MARCADA! Vai seguir onde ela estiver! 🔴';
+    aviso.innerHTML = '✅ FIXADO! Mexa à vontade — não solta!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -216,7 +206,7 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // ⚡ PREVISÃO DE MOVIMENTO — VAI ONDE O COPO VAI ESTAR
+    // ⚡ PREVISÃO PRA NÃO FICAR ATRÁS
     const centroX = alvo.imgX + alvo.velocX * 1.2;
     const centroY = alvo.imgY + alvo.velocY * 1.2;
 
@@ -229,22 +219,19 @@ function rastrear() {
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
 
-            // ✅ IGNORA ZONA DO DEDO
+            // ✅ IGNORA DEDO
             if (Math.hypot(px - toqueX, py - toqueY) < alvo.raioIgnorarDedo * 0.7) continue;
 
-            // ✅ SÓ PROCURA DENTRO DO COPO — IGNORA O QUE TÁ MUITO EM CIMA
+            // ✅ SÓ DENTRO DO COPO — NÃO PEGA O DE CIMA
             const relY = dy / alvo.raioBusca;
-            if (relY < -0.70) continue; // PULA O QUE TÁ NO TOPO DO COPO
+            if (relY < alvo.alturaMin) continue;
 
             const i = (py * canvas.width + px) * 4;
             const dr = Math.abs(dados[i] - alvo.pedrinha.r);
             const dg = Math.abs(dados[i+1] - alvo.pedrinha.g);
             const db = Math.abs(dados[i+2] - alvo.pedrinha.b);
 
-            // PROCURA EXATAMENTE A COR DA PEDRINHA
-            if (dr < alvo.pedrinha.tol && 
-                dg < alvo.pedrinha.tol && 
-                db < alvo.pedrinha.tol) {
+            if (dr < alvo.pedrinha.tol && dg < alvo.pedrinha.tol && db < alvo.pedrinha.tol) {
                 somaX += px; somaY += py; q++;
             }
         }
@@ -256,13 +243,14 @@ function rastrear() {
         const dX = novoIX - alvo.imgX;
         const dY = novoIY - alvo.imgY;
 
-        // ⚡ RESPOSTA INSTANTÂNEA — NÃO FICA ATRÁS
+        // ⚡ RESPOSTA INSTANTÂNEA — MESMA VELOCIDADE DO COPO
         alvo.velocX = dX * 0.98 + alvo.velocX * 0.02;
         alvo.velocY = dY * 0.98 + alvo.velocY * 0.02;
 
         const novoX = (novoIX / canvas.width) * rect.width;
         const novoY = (novoIY / canvas.height) * rect.height;
 
+        // ✅ FIXO — NÃO DESLIZA NEM CAI
         alvo.x = novoX;
         alvo.y = novoY;
         alvo.imgX = novoIX;
@@ -270,19 +258,19 @@ function rastrear() {
         alvo.perdidos = 0;
     } else {
         alvo.perdidos++;
-        // ⚡ CONTINUA SEGUINDO A DIREÇÃO — NÃO PERDE
+        // ✅ SEGUE A DIREÇÃO — NÃO CAI PRA BAIXO SOZINHO
         alvo.imgX += alvo.velocX;
         alvo.imgY += alvo.velocY;
         alvo.x = (alvo.imgX / canvas.width) * rect.width;
         alvo.y = (alvo.imgY / canvas.height) * rect.height;
     }
 
-    // ✅ TODAS AS CORES GRUDADAS NA PRETA — NENHUMA FICA PRA TRÁS
+    // ✅ TODAS GRUDADAS — NENHUMA SE SEPARA
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
-        c.el.style.left = (alvo.x - c.w/2 + c.deslX) + 'px';
-        c.el.style.top = (alvo.y - c.h/2 + c.deslY) + 'px';
+        c.el.style.left = (alvo.x - c.w / 2 + c.deslX) + 'px';
+        c.el.style.top = (alvo.y - c.h / 2 + c.deslY) + 'px';
     });
 
     requestAnimationFrame(rastrear);
