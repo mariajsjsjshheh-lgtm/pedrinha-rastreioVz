@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — FIXO & RÁPIDO ⚡</title>
+<title>COPOS — NÃO CAI MAIS ✅</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -24,7 +24,7 @@
         opacity: 0.95;
         box-shadow: 0 0 35px currentColor;
         transition: none;
-        will-change: left, top; /* ⚡ FIXA RENDERIZAÇÃO */
+        will-change: left, top;
     }
 
     .roxo { background: #9933ff; color: #9933ff; }
@@ -85,7 +85,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NA PEDRINHA DENTRO DO COPO — FICA FIXO!
+        👆 TOQUE NA PEDRINHA — NÃO CAI MAIS!
     </div>
 
     <div class="botoes">
@@ -113,11 +113,14 @@ const alvo = {
     x: 0, y: 0, imgX: 0, imgY: 0,
     velocX: 0, velocY: 0,
     raioBusca: 160,
-    resp: 1.0, // ⚡ NA MESMA VELOCIDADE DO COPO
+    resp: 1.0,
     perdidos: 0,
     maxPerdidos: 900,
     raioIgnorarDedo: 45,
-    alturaMin: -0.65 // IGNORA O QUE TÁ MUITO EM CIMA
+    alturaMin: -0.65,
+    // ✅ TRAVA PARA NÃO CAIR
+    ultY: 0,
+    travado: false
 };
 
 const coberturas = [
@@ -144,7 +147,7 @@ async function ligarCamera() {
         ctx = canvas.getContext('2d', { willReadFrequently: true });
         canvas.width = cam.videoWidth;
         canvas.height = cam.videoHeight;
-        aviso.innerHTML = '✅ PRONTO! Toque na pedrinha dentro do copo!';
+        aviso.innerHTML = '✅ PRONTO! Toque na pedrinha!';
     } catch (erro) { alert('Permita a câmera! 📷'); }
 }
 
@@ -164,8 +167,10 @@ function marcarPedrinha(e) {
     alvo.y = t.clientY;
     alvo.imgX = toqueX;
     alvo.imgY = toqueY;
+    alvo.ultY = toqueY; // Salva posição inicial
     alvo.marcado = true;
     alvo.perdidos = 0;
+    alvo.travado = false;
 
     ctx.drawImage(cam, 0, 0, canvas.width, canvas.height);
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -191,7 +196,7 @@ function marcarPedrinha(e) {
     }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ FIXADO! Mexa à vontade — não solta!';
+    aviso.innerHTML = '✅ FIXADO! NÃO CAI MAIS!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -206,7 +211,6 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // ⚡ PREVISÃO PRA NÃO FICAR ATRÁS
     const centroX = alvo.imgX + alvo.velocX * 1.2;
     const centroY = alvo.imgY + alvo.velocY * 1.2;
 
@@ -219,10 +223,8 @@ function rastrear() {
             if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
             if (Math.hypot(dx, dy) > alvo.raioBusca) continue;
 
-            // ✅ IGNORA DEDO
             if (Math.hypot(px - toqueX, py - toqueY) < alvo.raioIgnorarDedo * 0.7) continue;
 
-            // ✅ SÓ DENTRO DO COPO — NÃO PEGA O DE CIMA
             const relY = dy / alvo.raioBusca;
             if (relY < alvo.alturaMin) continue;
 
@@ -240,32 +242,39 @@ function rastrear() {
     if (q >= 4) {
         const novoIX = somaX / q;
         const novoIY = somaY / q;
-        const dX = novoIX - alvo.imgX;
-        const dY = novoIY - alvo.imgY;
+        
+        // ✅ BLOQUEIA QUEDA — só desce se for MUITO pouco
+        const limiteDescida = 15; // máximo que pode descer por vez
+        if (novoIY > alvo.ultY + limiteDescida) {
+            alvo.travado = true;
+        } else {
+            alvo.travado = false;
+            alvo.ultY = novoIY;
+        }
 
-        // ⚡ RESPOSTA INSTANTÂNEA — MESMA VELOCIDADE DO COPO
+        const dX = novoIX - alvo.imgX;
+        const dY = alvo.travado ? 0 : (novoIY - alvo.imgY);
+
         alvo.velocX = dX * 0.98 + alvo.velocX * 0.02;
-        alvo.velocY = dY * 0.98 + alvo.velocY * 0.02;
+        alvo.velocY = alvo.travado ? 0 : (dY * 0.98 + alvo.velocY * 0.02);
 
         const novoX = (novoIX / canvas.width) * rect.width;
-        const novoY = (novoIY / canvas.height) * rect.height;
+        const novoY = alvo.travado ? alvo.y : (novoIY / canvas.width) * rect.width;
 
-        // ✅ FIXO — NÃO DESLIZA NEM CAI
         alvo.x = novoX;
         alvo.y = novoY;
         alvo.imgX = novoIX;
-        alvo.imgY = novoIY;
+        if (!alvo.travado) alvo.imgY = novoIY;
         alvo.perdidos = 0;
     } else {
         alvo.perdidos++;
-        // ✅ SEGUE A DIREÇÃO — NÃO CAI PRA BAIXO SOZINHO
+        // ✅ NÃO DEIXA CAIR NUNCA — só segue o lado
         alvo.imgX += alvo.velocX;
-        alvo.imgY += alvo.velocY;
+        // alvo.imgY NÃO MEXE → não cai!
         alvo.x = (alvo.imgX / canvas.width) * rect.width;
-        alvo.y = (alvo.imgY / canvas.height) * rect.height;
+        // alvo.y NÃO MEXE → fica fixo na altura!
     }
 
-    // ✅ TODAS GRUDADAS — NENHUMA SE SEPARA
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
