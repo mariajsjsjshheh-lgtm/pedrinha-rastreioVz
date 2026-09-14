@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>COPOS — ESTÁVEL + RASTREIO FORTE ⚡</title>
+<title>COPOS — FIRME, FIXO, NÃO CAI ✅</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
@@ -85,7 +85,7 @@
     </div>
 
     <div class="aviso" id="aviso">
-        👆 TOQUE NA PEDRINHA — ESTÁVEL E NÃO PERDE!
+        👆 TOQUE NA PEDRINHA — FIRME E PARADO!
     </div>
 
     <div class="botoes">
@@ -109,25 +109,14 @@ let streamAtual = null;
 
 const alvo = {
     marcado: false,
-    pedrinha: { r: 220, g: 40, b: 40, tol: 52 },
+    pedrinha: { r: 220, g: 40, b: 40, tol: 55 },
     x: 0, y: 0, imgX: 0, imgY: 0,
-    velocX: 0, velocY: 0,
-    // ⚡ ZONA DE BUSCA AMPLA — PRA PULAR DE COPO
-    raioBusca: 220,
-    // ✅ ESTABILIDADE — sem oscilar
-    suavidade: 0.85, // quanto mais alto, mais estável
-    reatividade: 0.45, // quanto mais baixo, menos trepida
+    alturaFixa: 0, // 🔒 ALTURA TRAVADA
+    raioBusca: 200,
     perdidos: 0,
-    maxPerdidos: 1200, // aguenta MUITO sem ver
+    maxPerdidos: 800,
     raioIgnorarDedo: 45,
-    alturaMin: -0.65,
-    ultX: 0, ultY: 0,
-    // 🔴 DETECÇÃO RÁPIDA
-    detecaoRapida: {
-        ativa: false,
-        ultimoPonto: { x: 0, y: 0 },
-        distanciaMaxima: 400 // busca até essa distância ao redor
-    }
+    alturaMin: -0.65
 };
 
 const coberturas = [
@@ -144,7 +133,7 @@ async function ligarCamera() {
                 facingMode: 'environment',
                 width: { ideal: 1280, min: 640 },
                 height: { ideal: 720, min: 480 },
-                frameRate: { ideal: 60, min: 30 }
+                frameRate: { ideal: 30, min: 24 }
             },
             audio: false
         });
@@ -174,8 +163,7 @@ function marcarPedrinha(e) {
     alvo.y = t.clientY;
     alvo.imgX = toqueX;
     alvo.imgY = toqueY;
-    alvo.ultX = toqueX;
-    alvo.ultY = toqueY;
+    alvo.alturaFixa = toqueY; // 🔒 TRAVA A ALTURA AQUI
     alvo.marcado = true;
     alvo.perdidos = 0;
 
@@ -203,7 +191,7 @@ function marcarPedrinha(e) {
     }
 
     coberturas.forEach(c => c.el.style.display = 'block');
-    aviso.innerHTML = '✅ FIXADO! Estável e segue pra qualquer copo!';
+    aviso.innerHTML = '✅ TRAVADO! Não cai, não mexe sozinho!';
     btnMarcar.disabled = true;
     btnReiniciar.style.display = 'block';
     btnReligar.style.display = 'none';
@@ -218,15 +206,13 @@ function rastrear() {
     const dados = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     const rect = cam.getBoundingClientRect();
 
-    // ⚡ PREVISÃO INTELIGENTE — pra onde a pedrinha foi?
-    const centroX = alvo.imgX + alvo.velocX * 1.5;
-    const centroY = alvo.imgY + alvo.velocY * 1.5;
+    // 🔒 SÓ BUSCA NA ALTURA CERTA — NÃO DESCE NEM SOBE SOZINHO
+    const centroX = alvo.imgX;
+    const centroY = alvo.alturaFixa; // TRAVADO! Não muda!
 
     let somaX = 0, somaY = 0, q = 0;
-    let primeiroPonto = null;
 
-    // 🔴 BUSCA AMPLA — encontra mesmo que pule de copo
-    for (let dy = -alvo.raioBusca; dy <= alvo.raioBusca; dy += 2) {
+    for (let dy = -60; dy <= 60; dy += 2) { // só busca perto da altura certa
         for (let dx = -alvo.raioBusca; dx <= alvo.raioBusca; dx += 2) {
             const px = Math.round(centroX + dx);
             const py = Math.round(centroY + dy);
@@ -235,7 +221,7 @@ function rastrear() {
 
             if (Math.hypot(px - toqueX, py - toqueY) < alvo.raioIgnorarDedo * 0.7) continue;
 
-            const relY = dy / alvo.raioBusca;
+            const relY = dy / 60;
             if (relY < alvo.alturaMin) continue;
 
             const i = (py * canvas.width + px) * 4;
@@ -244,95 +230,27 @@ function rastrear() {
             const db = Math.abs(dados[i+2] - alvo.pedrinha.b);
 
             if (dr < alvo.pedrinha.tol && dg < alvo.pedrinha.tol && db < alvo.pedrinha.tol) {
-                if (!primeiroPonto) primeiroPonto = { x: px, y: py };
                 somaX += px; somaY += py; q++;
             }
         }
     }
 
     if (q >= 3) {
-        const novoIX = somaX / q;
-        const novoIY = somaY / q;
-
-        // ✅ ESTABILIZAÇÃO — NÃO OSCILA MAIS
-        // Calcula a diferença real
-        const dX = novoIX - alvo.imgX;
-        const dY = novoIY - alvo.imgY;
-
-        // Filtra "trepidação" — só se move quando REALMENTE mudou
-        if (Math.hypot(dX, dY) < 2) {
-            // Movimento muito pequeno = não mexe = fica estável
-        } else {
-            // Move suave, sem ir e voltar
-            alvo.velocX = dX * alvo.reatividade + alvo.velocX * (1 - alvo.reatividade);
-            alvo.velocY = dY * alvo.reatividade + alvo.velocY * (1 - alvo.reatividade);
-        }
-
-        // Posição suavizada — não pula
-        const finalIX = alvo.imgX + alvo.velocX;
-        const finalIY = alvo.imgY + alvo.velocY;
-
-        const novoX = (finalIX / canvas.width) * rect.width;
-        const novoY = (finalIY / canvas.height) * rect.height;
-
-        alvo.x = alvo.x * alvo.suavidade + novoX * (1 - alvo.suavidade);
-        alvo.y = alvo.y * alvo.suavidade + novoY * (1 - alvo.suavidade);
-        alvo.imgX = finalIX;
-        alvo.imgY = finalIY;
-        alvo.ultX = alvo.imgX;
-        alvo.ultY = alvo.imgY;
+        // ✅ ACHOU — VAI DIRETO, SEM ATRASO, SEM OSCILLAR
+        alvo.imgX = somaX / q;
+        // 🔒 NÃO MUDA A ALTURA — FICA FIXO!
         alvo.perdidos = 0;
-
     } else {
         alvo.perdidos++;
-
-        // 🔴 PEDRINHA SUMIU? BUSCA EM ÁREA MAIS AMPLA
-        if (alvo.perdidos < 60) {
-            // Continua seguindo a direção com força
-            alvo.imgX += alvo.velocX;
-            alvo.imgY += alvo.velocY;
-        } else {
-            // Depois de um tempinho, busca em volta do último ponto
-            const buscaRaio = 350;
-            let achouX = 0, achouY = 0, achouQ = 0;
-            
-            for (let dy = -buscaRaio; dy <= buscaRaio; dy += 3) {
-                for (let dx = -buscaRaio; dx <= buscaRaio; dx += 3) {
-                    const px = Math.round(alvo.ultX + dx);
-                    const py = Math.round(alvo.ultY + dy);
-                    if (px < 0 || px >= canvas.width || py < 0 || py >= canvas.height) continue;
-                    if (Math.hypot(dx, dy) > buscaRaio) continue;
-                    
-                    const relY = dy / buscaRaio;
-                    if (relY < alvo.alturaMin) continue;
-                    
-                    const i = (py * canvas.width + px) * 4;
-                    const dr = Math.abs(dados[i] - alvo.pedrinha.r);
-                    const dg = Math.abs(dados[i+1] - alvo.pedrinha.g);
-                    const db = Math.abs(dados[i+2] - alvo.pedrinha.b);
-                    
-                    if (dr < alvo.pedrinha.tol && dg < alvo.pedrinha.tol && db < alvo.pedrinha.tol) {
-                        achouX += px; achouY += py; achouQ++;
-                    }
-                }
-            }
-            
-            if (achouQ >= 3) {
-                // ENCONTROU! VAI DIRETO PRA LÁ!
-                alvo.imgX = achouX / achouQ;
-                alvo.imgY = achouY / achouQ;
-                alvo.velocX = 0;
-                alvo.velocY = 0;
-                alvo.perdidos = 0;
-            }
-        }
-
-        // Atualiza posição na tela
-        alvo.x = (alvo.imgX / canvas.width) * rect.width;
-        alvo.y = (alvo.imgY / canvas.height) * rect.height;
+        // 🔒 NÃO MEXE SOZINHO — FICA PARADO
+        // alvo.imgX NÃO MEXE, alvo.imgY NÃO MEXE
     }
 
-    // ✅ TODAS JUNTAS — nenhuma sai
+    // Converte pra tela
+    alvo.x = (alvo.imgX / canvas.width) * rect.width;
+    alvo.y = (alvo.alturaFixa / canvas.height) * rect.height; // SEMPRE FIXO!
+
+    // ✅ TODAS JUNTAS, NENHUMA SEPARA
     coberturas.forEach(c => {
         c.el.style.width = c.w + 'px';
         c.el.style.height = c.h + 'px';
@@ -348,7 +266,6 @@ document.addEventListener('mousedown', marcarPedrinha);
 
 btnReiniciar.onclick = () => {
     alvo.marcado = false;
-    alvo.velocX = alvo.velocY = 0;
     toqueX = toqueY = -9999;
     coberturas.forEach(c => c.el.style.display = 'none');
     btnMarcar.disabled = false;
